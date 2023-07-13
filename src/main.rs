@@ -1,3 +1,8 @@
+use crate::neural_network::NeuralNetwork;
+
+pub mod neural_network;
+pub mod tests;
+
 fn main() {
-    println!("Hello, world!");
+    let _ = NeuralNetwork::new(vec![28*28, 16, 16, 10]);
 }
