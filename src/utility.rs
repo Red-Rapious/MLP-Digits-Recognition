@@ -38,8 +38,8 @@ pub fn euclidian_distance(vector1: &Vec<f64>, vector2: &Vec<f64>) -> f64 {
 }
 
 /// Logistic function evaluated in x.
-pub fn sigmoid(x: f64, steepness: f64) -> f64 {
-    1.0 / (1.0 + (-x*steepness).exp())
+pub fn sigmoid(x: &f64) -> f64 {
+    1.0 / (1.0 + (-x).exp())
 }
 
 /// Splits a long vector in a vector of subvectors of length 'length'.

@@ -36,7 +36,7 @@ mod tests {
     fn test_feed_forward() {
         let nn = NeuralNetwork::new(vec![3, 4, 5, 6]);
         let input = vec![0.5, 0.2, 0.8];
-        let output = nn.feed_forward(input, &(|x| sigmoid(*x, 1.0)));
+        let output = nn.feed_forward(input, &sigmoid);
         println!("{:?}", output);
     }
 
