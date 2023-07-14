@@ -8,6 +8,7 @@ This project is personal does not, unless otherwise stated, follow any other tut
 
 ## Dataset
 [![MNIST examples](assets/mnist-examples.png)](http://yann.lecun.com/exdb/mnist/)
+
 The dataset used for both training and testing is the [MNIST dataset](http://yann.lecun.com/exdb/mnist/), which contains 60,000 training images and 10,000 testing images of handwritten digits. The images are 28x28 pixels, and the digits are centered in the middle of the image. Examples of the images are shown above.
 
 ## Results
