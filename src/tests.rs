@@ -2,6 +2,7 @@
 mod tests {
     use crate::neural_network::NeuralNetwork;
     use crate::utility::*;
+    use crate::mnist_parser::load_data;
 
     #[test]
     fn test_nn_initialisation() {
@@ -37,5 +38,10 @@ mod tests {
         let input = vec![0.5, 0.2, 0.8];
         let output = nn.feed_forward(input, &(|x| sigmoid(*x, 1.0)));
         println!("{:?}", output);
+    }
+
+    #[test]
+    fn test_mnist_parser() {
+        load_data(100, 100);
     }
 }

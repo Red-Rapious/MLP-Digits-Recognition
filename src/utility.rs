@@ -41,3 +41,18 @@ pub fn euclidian_distance(vector1: &Vec<f64>, vector2: &Vec<f64>) -> f64 {
 pub fn sigmoid(x: f64, steepness: f64) -> f64 {
     1.0 / (1.0 + (-x*steepness).exp())
 }
+
+/// Splits a long vector in a vector of subvectors of length 'length'.
+pub fn split_vector(vector: &Vec<u8>, length: usize) -> Vec<Vec<f64>> {
+    assert!(vector.len() % length == 0);
+
+    let mut data: Vec<Vec<f64>> = vec![];
+    for i in 0..vector.len()/(length) {
+        // Add the image to 'data', in the form of a vector of length IMAGE_SIDE*IMAGE_SIDE 
+        data.push(vec![]);
+        for y in 0..length {
+            data[i].push(vector[i*length + y] as f64 / 256.0);
+        }
+    }
+    data
+}

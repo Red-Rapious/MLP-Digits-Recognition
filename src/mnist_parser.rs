@@ -1,9 +1,11 @@
 use mnist::*;
+use crate::utility::split_vector;
 
 const IMAGE_SIDE: usize = 28;
 
-pub fn load_data(training_length: u32, test_lenght: u32) -> (Vec<Vec<f64>>, Vec<u8>, Vec<Vec<f64>>, Vec<u8>){
-
+/// Uses the mnist crate to load the training and testing sets.
+/// Returns (training_images, training_labels, testing_images, testing_labels)
+pub fn load_data(training_length: u32, test_length: u32) -> (Vec<Vec<f64>>, Vec<u8>, Vec<Vec<f64>>, Vec<u8>){
     // Deconstruct the returned Mnist struct.
     let Mnist {
         trn_img,
@@ -15,28 +17,14 @@ pub fn load_data(training_length: u32, test_lenght: u32) -> (Vec<Vec<f64>>, Vec<
         .label_format_digit()
         .training_set_length(training_length)
         //.validation_set_length(10_000)
-        .test_set_length(test_lenght)
+        .test_set_length(test_length)
         .finalize();
 
-    (split_buffer(&trn_img),
-    trn_lbl,
-    split_buffer(&tst_img),
-    tst_lbl)
+    (split_vector(&trn_img, IMAGE_SIDE*IMAGE_SIDE), trn_lbl, 
+     split_vector(&tst_img, IMAGE_SIDE*IMAGE_SIDE), tst_lbl)
 }
 
-fn split_buffer(buffer: &Vec<u8>) -> Vec<Vec<f64>> {
-    assert!(buffer.len() % IMAGE_SIDE*IMAGE_SIDE == 0);
-    let mut data: Vec<Vec<f64>> = vec![];
-    for i in 0..buffer.len()/(IMAGE_SIDE*IMAGE_SIDE) {
-        data.push(vec![]);
-        for y in 0..IMAGE_SIDE*IMAGE_SIDE {
-            data[i].push(buffer[i*IMAGE_SIDE*IMAGE_SIDE + y] as f64 / 256.0);
-        }
-    }
-
-    data
-}
-
+/// Splits a long vector in a vector of 2D vectors representing each image.
 fn _buffer_to_3d_vector(buffer: &Vec<u8>) -> Vec<Vec<Vec<f64>>> {
     assert!(buffer.len() % IMAGE_SIDE*IMAGE_SIDE == 0);
     
