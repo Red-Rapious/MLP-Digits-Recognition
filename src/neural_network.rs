@@ -1,13 +1,14 @@
 use rand_distr::{Normal, Distribution};
+use crate::utility::*;
 
 /// A structure containing the actual neural network layers, weights, and biases.
 pub struct NeuralNetwork {
     /// The number of neurons in each layer, including first and last layers.
     layers: Vec<usize>,
     /// The weight of each synapse. The shape of weights\[i\] is (layers\[i+1\], layers\[i\])
-    weights: Vec< Vec<Vec<f32>> >,
+    weights: Vec< Vec<Vec<f64>> >,
     /// The bias of each synaspse. biases\[0\] should always be a vector full of zeros.
-    biases: Vec< Vec<f32> >
+    biases: Vec< Vec<f64> >
 }
 
 impl NeuralNetwork {
@@ -50,5 +51,16 @@ impl NeuralNetwork {
             weights: weights,
             biases: biases
         }
+    }
+
+    pub fn feed_forward(&self, input: Vec<f64>, activation_function: &dyn Fn(&f64) -> f64) -> Vec<f64> {
+        let mut activation = input;
+        for i in 0..self.layers.len()-1 {
+            assert_eq!(activation.len(), self.layers[i]);
+            activation = matrix_vector_product(&self.weights[i], &activation);
+            activation = vectors_sum(&activation , &self.biases[i]);
+            activation = activation.iter().map(activation_function).collect();
+        }
+        activation
     }
 }
