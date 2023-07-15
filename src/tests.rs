@@ -1,8 +1,10 @@
 #[cfg(test)]
 mod tests {
+    use crate::evaluation_result::EvaluationResult;
     use crate::neural_network::NeuralNetwork;
     use crate::utility::*;
     use crate::mnist_parser::load_data;
+    //use crate::evaluation_result::*;
 
     #[test]
     fn test_nn_initialisation() {
@@ -43,5 +45,15 @@ mod tests {
     #[test]
     fn test_mnist_parser() {
         load_data(100, 100);
+    }
+
+    #[test]
+    fn test_accuracy_null() {
+        assert_eq!(EvaluationResult::new(0, 0).accuracy(), None);
+    }
+
+    #[test]
+    fn test_accuracy_half() {
+        assert_eq!(EvaluationResult::new(8, 8).accuracy(), Some(0.5));
     }
 }

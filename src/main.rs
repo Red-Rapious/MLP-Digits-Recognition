@@ -7,12 +7,19 @@ pub mod neural_network;
 pub mod tests;
 pub mod utility;
 pub mod mnist_parser;
+pub mod evaluation_result;
 
-#[show_image::main]
+//#[show_image::main]
 fn main() {
     let neural_network = NeuralNetwork::new(vec![28*28, 16, 16, 10]);
-    let (training_images, training_labels, _, _) = load_data(5, 0);
-    let result = neural_network.feed_forward(training_images[0].clone(), &sigmoid);
+    let (_, _, test_images, test_labels) = load_data(0, 100);
+    let result = neural_network.evaluate(test_images, test_labels, &sigmoid);
+    println!("results: {:?}\naccuracy: {:?}", result, result.accuracy());
+}
+
+fn _preview_images() {
+    let (training_images, _, _, _) = load_data(5, 0);
+    //let _result = neural_network.feed_forward(training_images[0].clone(), &sigmoid);
     //println!("result: {:?} \nlabel: {}", result, training_labels[0]);
 
     for i in 0..5 {
