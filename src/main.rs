@@ -13,7 +13,7 @@ pub mod evaluation_result;
 fn main() {
     let neural_network = NeuralNetwork::new(vec![28*28, 16, 16, 10]);
     let (_, _, test_images, test_labels) = load_data(0, 100);
-    let result = neural_network.evaluate(test_images, test_labels, &sigmoid);
+    let result = neural_network.evaluate(&(test_images.into_iter().zip(test_labels.into_iter()).collect()), &sigmoid);
     println!("results: {:?}\naccuracy: {:?}", result, result.accuracy());
 }
 

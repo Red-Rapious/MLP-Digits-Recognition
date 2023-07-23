@@ -1,3 +1,4 @@
+/// Holds the results of an evaluation, i.e. the number of correct and incorrect outputs.
 #[derive(Debug)]
 pub struct EvaluationResult {
     corrects: usize,
@@ -13,6 +14,7 @@ impl EvaluationResult {
         self.corrects + self.incorrects
     }
 
+    /// Computes the number of correct outputs divided by the total number of outputs.
     pub fn accuracy(&self) -> Option<f64> {
         let l = self.test_data_length();
         if l == 0 {
