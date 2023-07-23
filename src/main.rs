@@ -1,4 +1,4 @@
-use crate::neural_network::NeuralNetwork;
+use crate::{neural_network::NeuralNetwork, evaluation_result::EvaluationResult};
 use crate::mnist_parser::*;
 use crate::utility::sigmoid;
 use show_image::{ImageView, ImageInfo, create_window};
@@ -14,7 +14,7 @@ fn main() {
     let neural_network = NeuralNetwork::new(vec![28*28, 16, 16, 10]);
     let (_, _, test_images, test_labels) = load_data(0, 100);
     let result = neural_network.evaluate(&(test_images.into_iter().zip(test_labels.into_iter()).collect()), &sigmoid);
-    println!("results: {:?}\naccuracy: {:?}", result, result.accuracy());
+    println!("{}", result);
 }
 
 fn _preview_images() {

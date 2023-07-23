@@ -1,3 +1,5 @@
+use std::fmt;
+
 /// Holds the results of an evaluation, i.e. the number of correct and incorrect outputs.
 #[derive(Debug)]
 pub struct EvaluationResult {
@@ -22,5 +24,17 @@ impl EvaluationResult {
         } else {
             return Some (self.corrects as f64 / l as f64)
         }
+    }
+}
+
+impl fmt::Display for EvaluationResult {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        write!(f, "Evaluation result:\n   corrects: {}/{}\n   accuracy: {}", 
+            self.corrects, 
+            self.test_data_length(), 
+            match self.accuracy() {
+                None => String::from("undef"),
+                Some(a) => a.to_string()
+            })
     }
 }
