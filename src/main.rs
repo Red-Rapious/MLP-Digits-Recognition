@@ -1,6 +1,6 @@
 use crate::neural_network::NeuralNetwork;
 use crate::mnist_parser::*;
-use crate::utility::sigmoid;
+use crate::utility::{sigmoid, sigmoid_prime};
 use show_image::{ImageView, ImageInfo, create_window};
 
 pub mod neural_network;
@@ -11,10 +11,11 @@ pub mod evaluation_result;
 
 //#[show_image::main]
 fn main() {
-    let neural_network = NeuralNetwork::new(vec![28*28, 16, 16, 10]);
-    let (_, _, test_images, test_labels) = load_data(0, 100);
-    let result = neural_network.evaluate(&(test_images.into_iter().zip(test_labels.into_iter()).collect()), &sigmoid);
-    println!("{}", result);
+    let mut nn = NeuralNetwork::new(vec![28*28, 16, 16, 10]);
+    let (train_images, train_labels, validation_images, validation_labels) = load_data(300, 20);
+    let mut training_data = train_images.into_iter().zip(train_labels.into_iter()).collect();
+    let mut validation_data = validation_images.into_iter().zip(validation_labels.into_iter()).collect();
+    nn.train(&mut training_data, 30, 10, 1.0, &mut validation_data, &sigmoid, &sigmoid_prime);
 }
 
 fn _preview_images() {

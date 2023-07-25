@@ -1,7 +1,7 @@
 use rand_distr::{Normal, Distribution};
 use rand::thread_rng;
 use rand::seq::SliceRandom;
-use crate::utility::{matrix_vector_product, vectors_sum, matrices_sum, tensor_sum, sigmoid};
+use crate::utility::*;
 use crate::evaluation_result::*;
 
 /// A structure containing the actual neural network layers, weights, and biases.
@@ -79,7 +79,7 @@ impl NeuralNetwork {
     /// Each iteration is using a mini-batch of `batch_size` to pass backwards.
     /// If `validation_data` is provided, the network will test itself after each iteration.
     /// `learning_rate` is often written as η, or `eta`.
-    pub fn train(&mut self, training_data: &mut Vec<(Vec<f64>, u8)>, batch_size: usize, epochs_nb: usize, learning_rate: f64, validation_data: &mut Vec<(Vec<f64>, u8)>) {
+    pub fn train(&mut self, training_data: &mut Vec<(Vec<f64>, u8)>, batch_size: usize, epochs_nb: usize, learning_rate: f64, validation_data: &mut Vec<(Vec<f64>, u8)>, activation_function: &dyn Fn(&f64) -> f64, activation_prime: &dyn Fn(&f64) -> f64) {
         assert!(batch_size != 0);
         if training_data.len() % batch_size != 0 {
             println!("[Warning]: the last batch is missing {} images to complete a full batch size.", training_data.len() % batch_size);
@@ -92,31 +92,31 @@ impl NeuralNetwork {
 
             // Compute gradient and update weights and biases for each batch
             for batch in batches {
-                self.learn(batch, learning_rate);
+                self.learn(batch, learning_rate, activation_function, activation_prime);
             }
 
             // Display some update, and compute accuracy if validation is enabled.
             if !validation_data.is_empty() {
                 let result = self.evaluate(validation_data, &sigmoid);
-                println!("[PROGRESS] Epoch {}/{}: validation accuracy of {:?}.", epoch, epochs_nb, result.accuracy());
+                println!("  [PROGRESS] Epoch {}/{}: validation accuracy of {:?}.", epoch+1, epochs_nb, result.accuracy());
             }
             else {
-                println!("[PROGRESS] Epoch {}/{} completed.", epoch, epochs_nb);
+                println!("  [PROGRESS] Epoch {}/{} completed.", epoch+1, epochs_nb);
             }
         }
     }
 
     /// Updates the weights and biases using the gradient computed by backpropagation on one batch.
-    fn learn(&mut self, batch: &[(Vec<f64>, u8)], learning_rate: f64) {
+    fn learn(&mut self, batch: &[(Vec<f64>, u8)], learning_rate: f64, activation_function: &dyn Fn(&f64) -> f64, activation_prime: &dyn Fn(&f64) -> f64) {
         // This is the base iterative algorithm, as described on the Wikipedia
         // article of 'Stochastic gradient descent'
 
         // Initialise gradients for weights and biases.
         let mut grad_weights: Vec<Vec<Vec<f64>>> = vec![];
-        for weight in self.weights.iter() {
+        for i in 0..self.weights.len() {
             grad_weights.push(vec![]);
-            for x in 0..weight.len() {
-                grad_weights[x].push(vec![0.0; weight[0].len()]);
+            for _ in 0..self.weights[i].len() {
+                grad_weights[i].push(vec![0.0; self.weights[i][0].len()]);
             }
         }
         let mut grad_biases: Vec<Vec<f64>> = vec![];
@@ -126,22 +126,22 @@ impl NeuralNetwork {
 
         // Compute the overall approximate gradient of the cost on all images of the batch.
         for (image, label) in batch {
-            let (delta_grad_w, delta_grad_b) = self.backpropagation(image, label);
+            let (delta_grad_w, delta_grad_b) = self.backpropagation(image, &label, activation_function, activation_prime);
             tensor_sum(&mut grad_weights, &delta_grad_w);
             matrices_sum(&mut grad_biases, &delta_grad_b);
         }
 
         // Update the weights and biases based on the gradient and learning rate.
         for i in 0..self.weights.len() {
-            for j in 0..self.weights[0].len() {
-                for k in 0..self.weights[0][0].len() {
+            for j in 0..self.weights[i].len() {
+                for k in 0..self.weights[i][j].len() {
                     self.weights[i][j][k] -= grad_weights[i][j][k] * learning_rate
                 }
             }
         }
 
         for i in 0..self.biases.len() {
-            for j in 0..self.biases[0].len() {
+            for j in 0..self.biases[i].len() {
                 self.biases[i][j] -= grad_biases[i][j] * learning_rate
             }
         }
@@ -149,8 +149,64 @@ impl NeuralNetwork {
 
     /// Uses the Backpropagation algorithm to compute the approximate gradient of the cost function
     /// with respect to the weights and the biases.
-    fn backpropagation(&self, image: &Vec<f64>, label: &u8) -> (Vec< Vec<Vec<f64>> >, Vec< Vec<f64> >) {
-        (vec![], vec![])
+    fn backpropagation(&self, image: &Vec<f64>, label: &u8, activation_function: &dyn Fn(&f64) -> f64, activation_prime: &dyn Fn(&f64) -> f64) -> (Vec< Vec<Vec<f64>> >, Vec< Vec<f64> >) {
+        // Define the gradients
+        let mut grad_biases = vec![];
+        let mut grad_weights = vec![];
+
+        let mut activation = image.clone();
+
+        // Stores all the activations and weighted sums during the forward pass
+        let mut layers_activations = vec![image.clone()];
+        let mut weighted_sums = vec![];
+
+        // Feed-forward pass
+        for i in 0..self.weights.len() {
+            // Compute the weighted sum
+            activation = matrix_vector_product(&self.weights[i], &activation);
+            vectors_sum(&mut activation, &self.biases[i]);
+            weighted_sums.push(activation.clone());
+
+            // Compute the non-linear activation
+            for i in 0..activation.len() {
+                activation[i] = activation_function(&activation[i]);
+            }
+            layers_activations.push(activation.clone());
+        }
+
+        // Transforms the label into a vector
+        let vec_label: Vec<f64> = (0..10).map(|x| if x == *label { -1.0 } else { 0.0 }).collect();
+
+        // Define delta, the difference between the optimal activation for this image
+        // and the current output of the neural network
+        // The initial expression of delta corresponds to the derivative of the cost function
+        let mut delta = activation.clone();
+        vectors_sum(&mut delta, &vec_label);
+
+        // Starts the construction of the gradients.
+        // Note that the gradients are constructed in reverse and will be reversed at the end
+        grad_biases.push(delta.clone());
+        grad_weights.push(vectors_transpose_product(&delta, &layers_activations[layers_activations.len()-2].clone()));
+
+        // Backpropagation
+        for layer in (1..self.layers.len()-1).rev() {
+            // Apply the derivative of the activation function to the weighted sums
+            for i in 0..weighted_sums[layer].len() {
+                weighted_sums[layer][i] = activation_prime(&weighted_sums[layer][i]);
+            }
+
+            // Compute the gradient of biases
+            delta = matrix_vector_product(&transpose(&self.weights[layer]), &delta);
+            grad_biases.push(delta.clone());
+
+            // Compute the gradient of weights
+            grad_weights.push(vectors_transpose_product(&delta, &layers_activations[layer-1]));
+        }
+
+
+        grad_weights.reverse();
+        grad_biases.reverse();
+        (grad_weights, grad_biases)
     }
 
     /// Predicts the digit in a given image.
