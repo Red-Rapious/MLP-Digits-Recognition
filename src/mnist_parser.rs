@@ -3,8 +3,8 @@ use crate::utility::split_vector;
 
 const IMAGE_SIDE: usize = 28;
 
-/// Uses the mnist crate to load the training and testing sets.
-/// Returns (training_images, training_labels, testing_images, testing_labels)
+/// Uses the `mnist` crate to load the training and testing sets.
+/// Returns `(training_images, training_labels, testing_images, testing_labels)`
 pub fn load_data(training_length: u32, test_length: u32) -> (Vec<Vec<f64>>, Vec<u8>, Vec<Vec<f64>>, Vec<u8>){
     // Deconstruct the returned Mnist struct.
     let Mnist {

@@ -1,4 +1,4 @@
-use crate::{neural_network::NeuralNetwork, evaluation_result::EvaluationResult};
+use crate::neural_network::NeuralNetwork;
 use crate::mnist_parser::*;
 use crate::utility::sigmoid;
 use show_image::{ImageView, ImageInfo, create_window};
@@ -22,8 +22,8 @@ fn _preview_images() {
     //let _result = neural_network.feed_forward(training_images[0].clone(), &sigmoid);
     //println!("result: {:?} \nlabel: {}", result, training_labels[0]);
 
-    for i in 0..5 {
-        let pixel_data: Vec<u8> = training_images[i].iter().map(|x| ((1.0-x)*256.0) as u8).collect();
+    for training_image in training_images.iter().take(5) {
+        let pixel_data: Vec<u8> = training_image.iter().map(|x| ((1.0-x)*256.0) as u8).collect();
         let image = ImageView::new(ImageInfo::mono8(28, 28), &pixel_data);
     
         // Create a window with default options and display the image.

@@ -4,7 +4,6 @@ mod tests {
     use crate::neural_network::NeuralNetwork;
     use crate::utility::*;
     use crate::mnist_parser::load_data;
-    //use crate::evaluation_result::*;
 
     #[test]
     fn test_nn_initialisation() {

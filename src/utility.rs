@@ -16,15 +16,25 @@ pub fn matrix_vector_product(matrix: &Vec<Vec<f64>>, vector: &Vec<f64>) -> Vec<f
     result
 }
 
-/// Given two vectors `X1` and `X2` of the same size, returns `X1+X2`.
-pub fn vectors_sum(vector1: &Vec<f64>, vector2: &Vec<f64>) -> Vec<f64> {
+/// Given one mutable vector `X1` and another vector `X2` of the same size, adds `X2` to `X1`.
+pub fn vectors_sum(vector1: &mut Vec<f64>, vector2: &Vec<f64>) {
     assert_eq!(vector1.len(), vector2.len());
 
-    let mut sum = vec![];
     for i in 0..vector1.len() {
-        sum.push(vector1[i] + vector2[i]);
+        vector1[i] += vector2[i];
     }
-    sum
+}
+
+/// Given one mutable matrix `A1` and another matrix `A2` of the same size, adds `A2` to `A1`.
+pub fn matrices_sum(matrix1: &mut Vec<Vec<f64>>, matrix2: &Vec<Vec<f64>>) {
+    assert_eq!(matrix1.len(), matrix2.len());
+    assert_eq!(matrix1[0].len(), matrix2[0].len());
+
+    for i in 0..matrix1.len() {
+        for j in 0..matrix1[0].len() {
+            matrix1[i][j] += matrix2[i][j];
+        }
+    }
 }
 
 /// Given two vectors `X1` and `X2` of the same size, returns `||X1-X2||^2`, where `||.||` is the euclidian norm.

@@ -50,9 +50,9 @@ impl NeuralNetwork {
             biases.push(b_vector);
         }
         NeuralNetwork {
-            layers: layers,
-            weights: weights,
-            biases: biases
+            layers,
+            weights,
+            biases
         }
     }
 
@@ -60,10 +60,17 @@ impl NeuralNetwork {
     pub fn feed_forward(&self, input: Vec<f64>, activation_function: &dyn Fn(&f64) -> f64) -> Vec<f64> {
         let mut activation = input;
         for i in 0..self.layers.len()-1 {
-            assert_eq!(activation.len(), self.layers[i]);
+            // Multiply the activation by the weights matrix
             activation = matrix_vector_product(&self.weights[i], &activation);
-            activation = vectors_sum(&activation , &self.biases[i]);
-            activation = activation.iter().map(activation_function).collect();
+            // Add the biases
+            vectors_sum(&mut activation , &self.biases[i]);
+            
+            // Apply the activation function to every coefficient
+            // Here, I will not use `map` but instead a loop, to map in place
+            for i in 0..activation.len() {
+                activation[i] = activation_function(&activation[i]);
+            }
+            //activation = activation.iter().map(activation_function).collect();
         }
         activation
     }
@@ -89,7 +96,7 @@ impl NeuralNetwork {
             }
 
             // Display some update, and compute accuracy if validation is enabled.
-            if validation_data.len() != 0 {
+            if !validation_data.is_empty() {
                 let result = self.evaluate(validation_data, &sigmoid);
                 println!("[PROGRESS] Epoch {}/{}: validation accuracy of {:?}.", epoch, epochs_nb, result.accuracy());
             }
@@ -106,15 +113,15 @@ impl NeuralNetwork {
 
         // Initialise gradients for weights and biases.
         let mut grad_weights: Vec<Vec<Vec<f64>>> = vec![];
-        for i in 0..self.weights.len() {
+        for weight in self.weights.iter() {
             grad_weights.push(vec![]);
-            for x in 0..self.weights[i].len() {
-                grad_weights[x].push(vec![0.0; self.weights[i][0].len()]);
+            for x in 0..weight.len() {
+                grad_weights[x].push(vec![0.0; weight[0].len()]);
             }
         }
         let mut grad_biases: Vec<Vec<f64>> = vec![];
-        for i in 0..self.biases.len() {
-            grad_biases.push(vec![0.0; self.biases[i].len()])
+        for biais in self.biases.iter() {
+            grad_biases.push(vec![0.0; biais.len()])
         }
 
         // Compute the overall approximate gradient of the cost on all images of the batch.
@@ -150,9 +157,9 @@ impl NeuralNetwork {
         let (mut corrects, mut incorrects) = (0, 0);
 
         // Counts the number of corrects and incorrects classifications
-        for i in 0..test_data.len() {
-            let prediction = self.predict(test_data[i].0.clone(), activation_function);
-            match prediction == test_data[i].1 {
+        for data in test_data.iter() {
+            let prediction = self.predict(data.clone().0, activation_function);
+            match prediction == data.1 {
                 true => corrects += 1,
                 false => incorrects += 1
             }
