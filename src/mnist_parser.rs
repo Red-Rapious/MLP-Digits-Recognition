@@ -4,24 +4,28 @@ use crate::utility::split_vector;
 const IMAGE_SIDE: usize = 28;
 
 /// Uses the `mnist` crate to load the training and testing sets.
-/// Returns `(training_images, training_labels, testing_images, testing_labels)`
-pub fn load_data(training_length: u32, test_length: u32) -> (Vec<Vec<f64>>, Vec<u8>, Vec<Vec<f64>>, Vec<u8>){
+/// Returns `(training_images, training_labels, validation_images, validation_labels, testing_images, testing_labels)`
+pub fn load_data(training_length: u32, validation_length: u32, test_length: u32) -> (Vec<Vec<f64>>, Vec<u8>, Vec<Vec<f64>>, Vec<u8>, Vec<Vec<f64>>, Vec<u8>) {
     // Deconstruct the returned Mnist struct.
     let Mnist {
         trn_img,
         trn_lbl,
         tst_img,
         tst_lbl,
-        ..
+        val_img,
+        val_lbl
     } = MnistBuilder::new()
         .label_format_digit()
         .training_set_length(training_length)
-        //.validation_set_length(10_000)
+        .validation_set_length(validation_length)
         .test_set_length(test_length)
         .finalize();
 
-    (split_vector(&trn_img, IMAGE_SIDE*IMAGE_SIDE), trn_lbl, 
-     split_vector(&tst_img, IMAGE_SIDE*IMAGE_SIDE), tst_lbl)
+    (
+     split_vector(&trn_img, IMAGE_SIDE*IMAGE_SIDE), trn_lbl, 
+     split_vector(&val_img, IMAGE_SIDE*IMAGE_SIDE), val_lbl,
+     split_vector(&tst_img, IMAGE_SIDE*IMAGE_SIDE), tst_lbl,
+    )
 }
 
 /// Splits a long vector in a vector of 2D vectors representing each image.

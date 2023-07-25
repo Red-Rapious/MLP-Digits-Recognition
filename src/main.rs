@@ -11,15 +11,27 @@ pub mod evaluation_result;
 
 //#[show_image::main]
 fn main() {
+    // Initialise network
     let mut nn = NeuralNetwork::new(vec![28*28, 16, 16, 10]);
-    let (train_images, train_labels, validation_images, validation_labels) = load_data(300, 20);
+    // Get the data
+    let (train_images, train_labels, validation_images, validation_labels, test_images, test_labels) = load_data(300, 20, 100);
+
+    // Parse it
     let mut training_data = train_images.into_iter().zip(train_labels.into_iter()).collect();
     let mut validation_data = validation_images.into_iter().zip(validation_labels.into_iter()).collect();
-    nn.train(&mut training_data, 30, 10, 1.0, &mut validation_data, &sigmoid, &sigmoid_prime);
+    let testing_data = test_images.into_iter().zip(test_labels.into_iter()).collect();
+
+    // Train the network
+    nn.train(&mut training_data, 10, 30, 3.0, &mut validation_data, &sigmoid, &sigmoid_prime);
+
+    println!("\n\n");
+    // Test the network
+    let result = nn.evaluate(&testing_data, &sigmoid);
+    print!("{}\n", result);
 }
 
 fn _preview_images() {
-    let (training_images, _, _, _) = load_data(5, 0);
+    let (training_images, _, _, _, _, _) = load_data(5, 0, 0);
     //let _result = neural_network.feed_forward(training_images[0].clone(), &sigmoid);
     //println!("result: {:?} \nlabel: {}", result, training_labels[0]);
 

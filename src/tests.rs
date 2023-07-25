@@ -24,6 +24,7 @@ mod tests {
 
     // TODO: test matrices sum, tensor sum, vectors sum
 
+    /*
     #[test]
     fn test_euclidian_distance() {
         assert_eq!(
@@ -34,6 +35,7 @@ mod tests {
             4.0*16.0
         );
     } 
+    */
 
     #[test]
     fn test_feed_forward() {
@@ -45,7 +47,7 @@ mod tests {
 
     #[test]
     fn test_mnist_parser() {
-        load_data(100, 100);
+        load_data(100, 100, 100);
     }
 
     #[test]
@@ -60,10 +62,10 @@ mod tests {
 
     #[test]
     fn test_train() {
-        let mut nn = NeuralNetwork::new(vec![28*28, 16, 16, 10]);
-        let (train_images, train_labels, validation_images, validation_labels) = load_data(100, 10);
+        let mut nn = NeuralNetwork::new(vec![28*28, 16, 10]);
+        let (train_images, train_labels, validation_images, validation_labels, _, _) = load_data(10, 10, 0);
         let mut training_data = train_images.into_iter().zip(train_labels.into_iter()).collect();
         let mut validation_data = validation_images.into_iter().zip(validation_labels.into_iter()).collect();
-        nn.train(&mut training_data, 2, 10, 1.0, &mut validation_data, &sigmoid, &sigmoid_prime);
+        nn.train(&mut training_data, 2, 2, 1.0, &mut validation_data, &sigmoid, &sigmoid_prime);
     }
 }

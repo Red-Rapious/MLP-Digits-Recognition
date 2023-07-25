@@ -98,7 +98,7 @@ impl NeuralNetwork {
             // Display some update, and compute accuracy if validation is enabled.
             if !validation_data.is_empty() {
                 let result = self.evaluate(validation_data, &sigmoid);
-                println!("  [PROGRESS] Epoch {}/{}: validation accuracy of {:?}.", epoch+1, epochs_nb, result.accuracy());
+                println!("  [PROGRESS] Epoch {}/{}: validation accuracy of {}.", epoch+1, epochs_nb, result.accuracy().unwrap());
             }
             else {
                 println!("  [PROGRESS] Epoch {}/{} completed.", epoch+1, epochs_nb);

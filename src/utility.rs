@@ -66,6 +66,7 @@ pub fn vectors_transpose_product(vector1: &Vec<f64>, vector2: &Vec<f64>) -> Vec<
     matrix
 }
 
+/*
 /// Given two vectors `X1` and `X2` of the same size, returns `||X1-X2||^2`, where `||.||` is the euclidian norm.
 pub fn euclidian_distance(vector1: &Vec<f64>, vector2: &Vec<f64>) -> f64 {
     assert_eq!(vector1.len(), vector2.len(), "The two vectors have different sizes.");
@@ -76,6 +77,7 @@ pub fn euclidian_distance(vector1: &Vec<f64>, vector2: &Vec<f64>) -> f64 {
     }
     total
 }
+*/
 
 /// Given a matrix `A`, returns `A^T`, the transpose of `A`.
 pub fn transpose(matrix: &Vec<Vec<f64>>) -> Vec<Vec<f64>> {
@@ -106,7 +108,7 @@ pub fn split_vector(vector: &Vec<u8>, length: usize) -> Vec<Vec<f64>> {
 
     let mut data: Vec<Vec<f64>> = vec![];
     for i in 0..vector.len()/(length) {
-        // Add the image to `data`, in the form of a vector of length `IMAGE_SIDE*IMAGE_SIDE`
+        // Add the image to `data`, in the form of a vector of length `length*length`
         data.push(vec![]);
         for y in 0..length {
             data[i].push(vector[i*length + y] as f64 / 256.0);

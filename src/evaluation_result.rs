@@ -34,7 +34,7 @@ impl fmt::Display for EvaluationResult {
             self.test_data_length(), 
             match self.accuracy() {
                 None => String::from("undef"),
-                Some(a) => a.to_string()
+                Some(a) => (a*100.0).to_string() + &String::from("%")
             })
     }
 }
