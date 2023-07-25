@@ -1,7 +1,7 @@
 use rand_distr::{Normal, Distribution};
 use rand::thread_rng;
 use rand::seq::SliceRandom;
-use crate::utility::{matrix_vector_product, vectors_sum, sigmoid};
+use crate::utility::{matrix_vector_product, vectors_sum, matrices_sum, tensor_sum, sigmoid};
 use crate::evaluation_result::*;
 
 /// A structure containing the actual neural network layers, weights, and biases.
@@ -79,7 +79,7 @@ impl NeuralNetwork {
     /// Each iteration is using a mini-batch of `batch_size` to pass backwards.
     /// If `validation_data` is provided, the network will test itself after each iteration.
     /// `learning_rate` is often written as η, or `eta`.
-    pub fn train(&self, training_data: &mut Vec<(Vec<f64>, u8)>, batch_size: usize, epochs_nb: usize, learning_rate: f64, validation_data: &mut Vec<(Vec<f64>, u8)>) {
+    pub fn train(&mut self, training_data: &mut Vec<(Vec<f64>, u8)>, batch_size: usize, epochs_nb: usize, learning_rate: f64, validation_data: &mut Vec<(Vec<f64>, u8)>) {
         assert!(batch_size != 0);
         if training_data.len() % batch_size != 0 {
             println!("[Warning]: the last batch is missing {} images to complete a full batch size.", training_data.len() % batch_size);
@@ -107,7 +107,7 @@ impl NeuralNetwork {
     }
 
     /// Updates the weights and biases using the gradient computed by backpropagation on one batch.
-    fn learn(&self, batch: &[(Vec<f64>, u8)], learning_rate: f64) {
+    fn learn(&mut self, batch: &[(Vec<f64>, u8)], learning_rate: f64) {
         // This is the base iterative algorithm, as described on the Wikipedia
         // article of 'Stochastic gradient descent'
 
@@ -127,8 +127,23 @@ impl NeuralNetwork {
         // Compute the overall approximate gradient of the cost on all images of the batch.
         for (image, label) in batch {
             let (delta_grad_w, delta_grad_b) = self.backpropagation(image, label);
-            //grad_weights += delta_grad_w;
-            //grad_biases += delta_grad_b;
+            tensor_sum(&mut grad_weights, &delta_grad_w);
+            matrices_sum(&mut grad_biases, &delta_grad_b);
+        }
+
+        // Update the weights and biases based on the gradient and learning rate.
+        for i in 0..self.weights.len() {
+            for j in 0..self.weights[0].len() {
+                for k in 0..self.weights[0][0].len() {
+                    self.weights[i][j][k] -= grad_weights[i][j][k] * learning_rate
+                }
+            }
+        }
+
+        for i in 0..self.biases.len() {
+            for j in 0..self.biases[0].len() {
+                self.biases[i][j] -= grad_biases[i][j] * learning_rate
+            }
         }
     }
 

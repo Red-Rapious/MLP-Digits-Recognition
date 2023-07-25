@@ -37,6 +37,21 @@ pub fn matrices_sum(matrix1: &mut Vec<Vec<f64>>, matrix2: &Vec<Vec<f64>>) {
     }
 }
 
+/// Given one mutable tensor `T1` and another tensor `T2` of the same size, adds `T2` to `T1`.
+pub fn tensor_sum(tensor1: &mut Vec<Vec<Vec<f64>>>, tensor2: &Vec<Vec<Vec<f64>>>) {
+    assert_eq!(tensor1.len(), tensor2.len());
+    assert_eq!(tensor1[0].len(), tensor2[0].len());
+    assert_eq!(tensor1[0][0].len(), tensor2[0][0].len());
+
+    for i in 0..tensor1.len() {
+        for j in 0..tensor1[0].len() {
+            for k in 0..tensor1[0][0].len() {
+                tensor1[i][j][k] += tensor2[i][j][k];
+            }
+        }
+    }
+}
+
 /// Given two vectors `X1` and `X2` of the same size, returns `||X1-X2||^2`, where `||.||` is the euclidian norm.
 pub fn euclidian_distance(vector1: &Vec<f64>, vector2: &Vec<f64>) -> f64 {
     assert_eq!(vector1.len(), vector2.len());

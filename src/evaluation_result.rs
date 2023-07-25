@@ -9,7 +9,7 @@ pub struct EvaluationResult {
 
 impl EvaluationResult {
     pub fn new(corrects: usize, incorrects: usize) -> Self {
-        EvaluationResult { corrects: corrects, incorrects: incorrects }
+        EvaluationResult { corrects, incorrects }
     }
     
     pub fn test_data_length(&self) -> usize {
@@ -20,9 +20,9 @@ impl EvaluationResult {
     pub fn accuracy(&self) -> Option<f64> {
         let l = self.test_data_length();
         if l == 0 {
-            return None
+            None
         } else {
-            return Some (self.corrects as f64 / l as f64)
+            Some (self.corrects as f64 / l as f64)
         }
     }
 }

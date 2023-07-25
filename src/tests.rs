@@ -22,6 +22,8 @@ mod tests {
         );
     }
 
+    // TODO: test matrices sum, tensor sum, vectors sum
+
     #[test]
     fn test_euclidian_distance() {
         assert_eq!(
