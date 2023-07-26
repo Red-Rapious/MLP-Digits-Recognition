@@ -111,7 +111,7 @@ impl NeuralNetwork {
         // This is the base iterative algorithm, as described on the Wikipedia
         // article of 'Stochastic gradient descent'
 
-        // Initialise gradients for weights and biases.
+        // Initialise gradients for weights and biases to zeros.
         let mut grad_weights: Vec<Vec<Vec<f64>>> = vec![];
         for i in 0..self.weights.len() {
             grad_weights.push(vec![]);
@@ -126,7 +126,9 @@ impl NeuralNetwork {
 
         // Compute the overall approximate gradient of the cost on all images of the batch.
         for (image, label) in batch {
+            // Use backpropagation to find the small variation of gradient
             let (delta_grad_w, delta_grad_b) = self.backpropagation(image, &label, activation_function, activation_prime);
+            // Update the gradient by adding the small variation
             tensor_sum(&mut grad_weights, &delta_grad_w);
             matrices_sum(&mut grad_biases, &delta_grad_b);
         }
@@ -135,6 +137,7 @@ impl NeuralNetwork {
         for i in 0..self.weights.len() {
             for j in 0..self.weights[i].len() {
                 for k in 0..self.weights[i][j].len() {
+                    // We try to minimise the cost function, so we substract the gradient
                     self.weights[i][j][k] -= grad_weights[i][j][k] * learning_rate
                 }
             }
@@ -147,13 +150,14 @@ impl NeuralNetwork {
         }
     }
 
-    /// Uses the Backpropagation algorithm to compute the approximate gradient of the cost function
-    /// with respect to the weights and the biases.
+    /// Uses the Backpropagation algorithm to compute the approximate gradient 
+    /// of the cost function with respect to the weights and the biases.
     fn backpropagation(&self, image: &Vec<f64>, label: &u8, activation_function: &dyn Fn(&f64) -> f64, activation_prime: &dyn Fn(&f64) -> f64) -> (Vec< Vec<Vec<f64>> >, Vec< Vec<f64> >) {
-        // Define the gradients
+        // Initialise the gradients
         let mut grad_biases = vec![];
         let mut grad_weights = vec![];
 
+        // Current activation, starting from the input layer
         let mut activation = image.clone();
 
         // Stores all the activations and weighted sums during the forward pass
@@ -174,14 +178,22 @@ impl NeuralNetwork {
             layers_activations.push(activation.clone());
         }
 
-        // Transforms the label into a vector
+        // Transforms the label into a vector made of 0 everywhere execept a -1 at the correct position
         let vec_label: Vec<f64> = (0..10).map(|x| if x == *label { -1.0 } else { 0.0 }).collect();
 
-        // Define delta, the difference between the optimal activation for this image
+        // Define delta, the difference between the optimal activation for this image,
         // and the current output of the neural network
-        // The initial expression of delta corresponds to the derivative of the cost function
+        // The initial expression of delta corresponds to the derivative of the cost function,
+        // without the factor 2
         let mut delta = activation.clone();
         vectors_sum(&mut delta, &vec_label);
+
+        // Multiply `delta` by the last weighted sum, to which `activation_prime` is applied
+        let last_layer = weighted_sums.len() - 1;
+        assert_eq!(delta.len(), weighted_sums[last_layer].len(), "Incompatible sizes for delta and the last layer's weighted sum.");
+        for i in 0..delta.len() {
+            delta[i] *= activation_prime(&weighted_sums[last_layer][i])
+        }
 
         // Starts the construction of the gradients.
         // Note that the gradients are constructed in reverse and will be reversed at the end
@@ -189,21 +201,24 @@ impl NeuralNetwork {
         grad_weights.push(vectors_transpose_product(&delta, &layers_activations[layers_activations.len()-2].clone()));
 
         // Backpropagation
-        for layer in (1..self.layers.len()-1).rev() {
-            // Apply the derivative of the activation function to the weighted sums
-            for i in 0..weighted_sums[layer].len() {
-                weighted_sums[layer][i] = activation_prime(&weighted_sums[layer][i]);
+        for layer in 2..self.layers.len() {
+            // Backpropagate: determine delta depending on the previous layer
+            delta = matrix_vector_product(&transpose(&self.weights[self.weights.len() - layer + 1]), &delta);
+            
+            // Multiply `delta` by the weighted sum, to which `activation_prime` is applied
+            assert_eq!(delta.len(), weighted_sums[weighted_sums.len() - layer].len(), "Incompatible sizes for delta and the layer's weighted sum, for layer number {}", self.layers.len() - layer - 1);
+            for i in 0..delta.len() {
+                delta[i] *= activation_prime(&weighted_sums[weighted_sums.len() - layer][i])
             }
 
-            // Compute the gradient of biases
-            delta = matrix_vector_product(&transpose(&self.weights[layer]), &delta);
+            // Add the gradient of biases of the layer
             grad_biases.push(delta.clone());
 
-            // Compute the gradient of weights
-            grad_weights.push(vectors_transpose_product(&delta, &layers_activations[layer-1]));
+            // Add the gradient of weights of the layer
+            grad_weights.push(vectors_transpose_product(&delta, &layers_activations[layers_activations.len() - layer -1]));
         }
 
-
+        // Reverse the grad vectors since they were build backwards
         grad_weights.reverse();
         grad_biases.reverse();
         (grad_weights, grad_biases)
