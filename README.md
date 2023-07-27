@@ -12,7 +12,9 @@ This project is personal does not, unless otherwise stated, follow any other tut
 The dataset used for both training and testing is the [MNIST dataset](http://yann.lecun.com/exdb/mnist/), which contains 60,000 training images and 10,000 testing images of handwritten digits. The images are 28x28 pixels, and the digits are centered in the middle of the image. Examples of the images are shown above.
 
 ## Results
-> This section is a work in progress.
+| Layers | Training images | Testing images | Batch size | Epochs | Learning rate | Activation function | Training time |
+| - | - | - | - | - | - | - | - |
+| 784, 16, 16, 10 | 10 000 | 1 000 | 10 | 30 | 3.0 | Sigmoid | *Not mesured* |
 
 ## License
 This work is licensed under the [CC-BY-NC-SA 4.0](https://creativecommons.org/licenses/by-nc-sa/4.0/) license.
