@@ -10,7 +10,7 @@ pub mod mnist_parser;
 pub mod evaluation_result;
 
 const TRAIN_LENGTH: u32 = 10_000;
-const VALIDATION_LENGTH: u32 = 100;
+const VALIDATION_LENGTH: u32 = 0;
 const TEST_LENGTH: u32 = 1_000;
 
 const BATCH_SIZE: usize = 10;
