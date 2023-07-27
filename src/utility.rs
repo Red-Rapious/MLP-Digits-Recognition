@@ -91,17 +91,6 @@ pub fn transpose(matrix: &Vec<Vec<f64>>) -> Vec<Vec<f64>> {
     result
 }
 
-/// Logistic function evaluated in `x`.
-pub fn sigmoid(x: &f64) -> f64 {
-    1.0 / (1.0 + (-x).exp())
-}
-
-/// Derivative of sigmoid evaluated in `x`.
-pub fn sigmoid_prime(x: &f64) -> f64 {
-    let s = sigmoid(x);
-    s * (1.0 - s)
-}
-
 /// Splits a long vector in a vector of subvectors of length `length`.
 pub fn split_vector(vector: &Vec<u8>, length: usize) -> Vec<Vec<f64>> {
     assert!(vector.len() % length == 0, "The vector length is not a multple of the length.");

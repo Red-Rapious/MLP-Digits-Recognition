@@ -1,6 +1,7 @@
 use rand_distr::{Normal, Distribution};
 use rand::thread_rng;
 use rand::seq::SliceRandom;
+use crate::activation_function::ActivationFunction;
 use crate::utility::*;
 use crate::evaluation_result::*;
 
@@ -11,12 +12,14 @@ pub struct NeuralNetwork {
     /// The weight of each synapse. The shape of `weights\[i\]` is `(layers\[i+1\], layers\[i\])`.
     weights: Vec< Vec<Vec<f64>> >,
     /// The bias of each synaspse. The size of `biases\[i\]` is `(layers\[i+1\])`.
-    biases: Vec< Vec<f64> >
+    biases: Vec< Vec<f64> >,
+    /// The activation function and its derivative
+    activation_function: ActivationFunction
 }
 
 impl NeuralNetwork {
     /// Initialise a new Neural Network with random weights and biases.
-    pub fn new(layers: Vec<usize>) -> Self {
+    pub fn new(layers: Vec<usize>, activation_function: ActivationFunction) -> Self {
         // Normal distribution sampler
         let normal = Normal::new(0.0, 1.0).unwrap();
 
@@ -46,12 +49,13 @@ impl NeuralNetwork {
         NeuralNetwork {
             layers,
             weights,
-            biases
+            biases,
+            activation_function
         }
     }
 
     /// Computes the activations of the output layer, given the activations of the input layer.
-    pub fn feed_forward(&self, input: Vec<f64>, activation_function: &dyn Fn(&f64) -> f64) -> Vec<f64> {
+    pub fn feed_forward(&self, input: Vec<f64>) -> Vec<f64> {
         let mut activation = input;
         for i in 0..self.layers.len()-1 {
             // Multiply the activation by the weights matrix
@@ -62,7 +66,7 @@ impl NeuralNetwork {
             // Apply the activation function to every coefficient
             // Here, I will not use `map` but instead a loop, to map in place
             for i in 0..activation.len() {
-                activation[i] = activation_function(&activation[i]);
+                activation[i] = (self.activation_function.activation_function)(&activation[i]);
             }
             //activation = activation.iter().map(activation_function).collect();
         }
@@ -73,7 +77,7 @@ impl NeuralNetwork {
     /// Each iteration is using a mini-batch of `batch_size` to pass backwards.
     /// If `validation_data` is provided, the network will test itself after each iteration.
     /// `learning_rate` is often written as η, or `eta`.
-    pub fn train(&mut self, training_data: &mut Vec<(Vec<f64>, u8)>, batch_size: usize, epochs_nb: usize, learning_rate: f64, validation_data: &mut Vec<(Vec<f64>, u8)>, activation_function: &dyn Fn(&f64) -> f64, activation_prime: &dyn Fn(&f64) -> f64) {
+    pub fn train(&mut self, training_data: &mut Vec<(Vec<f64>, u8)>, batch_size: usize, epochs_nb: usize, learning_rate: f64, validation_data: &mut Vec<(Vec<f64>, u8)>) {
         assert!(batch_size != 0);
         if training_data.len() % batch_size != 0 {
             println!("[Warning]: the last batch is missing {} images to complete a full batch size.", training_data.len() % batch_size);
@@ -86,12 +90,12 @@ impl NeuralNetwork {
 
             // Compute gradient and update weights and biases for each batch
             for batch in batches {
-                self.learn(batch, learning_rate, activation_function, activation_prime);
+                self.learn(batch, learning_rate);
             }
 
             // Display some update, and compute accuracy if validation is enabled.
             if !validation_data.is_empty() {
-                let result = self.evaluate(validation_data, &sigmoid);
+                let result = self.evaluate(validation_data);
                 println!("  [PROGRESS] Epoch {}/{}: validation accuracy of {}%.", epoch+1, epochs_nb, result.accuracy().unwrap()*100.0);
             }
             else {
@@ -101,7 +105,7 @@ impl NeuralNetwork {
     }
 
     /// Updates the weights and biases using the gradient computed by backpropagation on one batch.
-    fn learn(&mut self, batch: &[(Vec<f64>, u8)], learning_rate: f64, activation_function: &dyn Fn(&f64) -> f64, activation_prime: &dyn Fn(&f64) -> f64) {
+    fn learn(&mut self, batch: &[(Vec<f64>, u8)], learning_rate: f64) {
         // This is the base iterative algorithm, as described on the Wikipedia
         // article of 'Stochastic gradient descent'
 
@@ -121,7 +125,7 @@ impl NeuralNetwork {
         // Compute the overall approximate gradient of the cost on all images of the batch.
         for (image, label) in batch {
             // Use backpropagation to find the small variation of gradient
-            let (delta_grad_w, delta_grad_b) = self.backpropagation(image, &label, activation_function, activation_prime);
+            let (delta_grad_w, delta_grad_b) = self.backpropagation(image, &label);
             // Update the gradient by adding the small variation
             tensor_sum(&mut grad_weights, &delta_grad_w);
             matrices_sum(&mut grad_biases, &delta_grad_b);
@@ -146,7 +150,7 @@ impl NeuralNetwork {
 
     /// Uses the Backpropagation algorithm to compute the approximate gradient 
     /// of the cost function with respect to the weights and the biases.
-    fn backpropagation(&self, image: &Vec<f64>, label: &u8, activation_function: &dyn Fn(&f64) -> f64, activation_prime: &dyn Fn(&f64) -> f64) -> (Vec< Vec<Vec<f64>> >, Vec< Vec<f64> >) {
+    fn backpropagation(&self, image: &Vec<f64>, label: &u8) -> (Vec< Vec<Vec<f64>> >, Vec< Vec<f64> >) {
         // Current activation, starting from the input layer
         let mut activation = image.clone();
 
@@ -163,7 +167,7 @@ impl NeuralNetwork {
 
             // Compute the non-linear activation
             for i in 0..activation.len() {
-                activation[i] = activation_function(&activation[i]);
+                activation[i] = (self.activation_function.activation_function)(&activation[i]);
             }
             layers_activations.push(activation.clone());
         }
@@ -182,7 +186,7 @@ impl NeuralNetwork {
         // Multiply `delta` by the last weighted sum, to which `activation_prime` is applied
         assert_eq!(delta.len(), weighted_sums[last_layer].len(), "Incompatible sizes for delta and the last layer's weighted sum.");
         for i in 0..delta.len() {
-            delta[i] *= activation_prime(&weighted_sums[last_layer][i])
+            delta[i] *= (self.activation_function.activation_prime)(&weighted_sums[last_layer][i])
         }
 
         // Starts the construction of the gradients.
@@ -200,7 +204,7 @@ impl NeuralNetwork {
             // Multiply `delta` by the weighted sum, to which `activation_prime` is applied
             assert_eq!(delta.len(), weighted_sums[weighted_sums.len() - layer].len(), "Incompatible sizes for delta and the layer's weighted sum, for layer number {}", self.layers.len() - layer - 1);
             for i in 0..delta.len() {
-                delta[i] *= activation_prime(&weighted_sums[weighted_sums.len() - layer][i])
+                delta[i] *= (self.activation_function.activation_prime)(&weighted_sums[weighted_sums.len() - layer][i])
             }
 
             // Add the gradient of biases of the layer
@@ -217,8 +221,8 @@ impl NeuralNetwork {
     }
 
     /// Predicts the digit in a given image.
-    pub fn predict(&self, input: Vec<f64>, activation_function: &dyn Fn(&f64) -> f64) -> u8 {
-        let result = self.feed_forward(input, activation_function);
+    pub fn predict(&self, input: Vec<f64>) -> u8 {
+        let result = self.feed_forward(input);
 
         // Select the highest activation of the output layer.
         let mut maxi = (result[0], 0);
@@ -231,12 +235,12 @@ impl NeuralNetwork {
     }
 
     /// Evaluates the neural network on a test set.
-    pub fn evaluate(&self, test_data: &Vec<(Vec<f64>, u8)>, activation_function: &dyn Fn(&f64) -> f64) -> EvaluationResult {
+    pub fn evaluate(&self, test_data: &Vec<(Vec<f64>, u8)>) -> EvaluationResult {
         let (mut corrects, mut incorrects) = (0, 0);
 
         // Counts the number of corrects and incorrects classifications
         for data in test_data.iter() {
-            let prediction = self.predict(data.clone().0, activation_function);
+            let prediction = self.predict(data.clone().0);
             match prediction == data.1 {
                 true => corrects += 1,
                 false => incorrects += 1

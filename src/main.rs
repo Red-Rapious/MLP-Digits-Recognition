@@ -1,6 +1,6 @@
 use crate::neural_network::NeuralNetwork;
 use crate::mnist_parser::*;
-use crate::utility::{sigmoid, sigmoid_prime};
+use crate::activation_function::ActivationFunction;
 use show_image::{ImageView, ImageInfo, create_window};
 
 pub mod neural_network;
@@ -8,6 +8,7 @@ pub mod tests;
 pub mod utility;
 pub mod mnist_parser;
 pub mod evaluation_result;
+pub mod activation_function;
 
 const TRAIN_LENGTH: u32 = 10_000;
 const VALIDATION_LENGTH: u32 = 0;
@@ -16,6 +17,7 @@ const TEST_LENGTH: u32 = 1_000;
 const BATCH_SIZE: usize = 10;
 const EPOCHS: usize = 30;
 const LEARNING_RATE: f64 = 3.0;
+//const ACTIVATION
 
 //#[show_image::main]
 fn main() {
@@ -28,7 +30,7 @@ fn main() {
 
     // Initialise network
     print!("\nInitialising neural network... ");
-    let mut nn = NeuralNetwork::new(vec![28*28, 16, 16, 10]);
+    let mut nn = NeuralNetwork::new(vec![28*28, 16, 16, 10], ActivationFunction::simoid());
     println!("done.");
 
     // Get the data
@@ -46,12 +48,12 @@ fn main() {
         
     // Train the network
     println!("\n[INFO] Starting to train the network.");
-    nn.train(&mut training_data, BATCH_SIZE, EPOCHS, LEARNING_RATE, &mut validation_data, &sigmoid, &sigmoid_prime);
+    nn.train(&mut training_data, BATCH_SIZE, EPOCHS, LEARNING_RATE, &mut validation_data);
     println!("[INFO] Network trained.");
 
     print!("\n\nEvaluating the network... ");
     // Test the network
-    let result = nn.evaluate(&testing_data, &sigmoid);
+    let result = nn.evaluate(&testing_data);
     println!("done.");
     print!("{}\n", result);
 }
