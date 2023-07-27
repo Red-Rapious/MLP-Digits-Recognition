@@ -9,6 +9,14 @@ pub mod utility;
 pub mod mnist_parser;
 pub mod evaluation_result;
 
+const TRAIN_LENGTH: u32 = 10_000;
+const VALIDATION_LENGTH: u32 = 100;
+const TEST_LENGTH: u32 = 1_000;
+
+const BATCH_SIZE: usize = 10;
+const EPOCHS: usize = 30;
+const LEARNING_RATE: f64 = 3.0;
+
 //#[show_image::main]
 fn main() {
     // Initialise network
@@ -17,7 +25,7 @@ fn main() {
     let (train_images, train_labels, 
         validation_images, validation_labels, 
         test_images, test_labels) = 
-        load_data(500, 20, 100);
+        load_data(TRAIN_LENGTH, VALIDATION_LENGTH, TEST_LENGTH);
 
     // Parse it
     let mut training_data: Vec<(Vec<f64>, u8)> = train_images.into_iter().zip(train_labels.into_iter()).collect();
@@ -25,7 +33,7 @@ fn main() {
     let testing_data: Vec<(Vec<f64>, u8)> = test_images.into_iter().zip(test_labels.into_iter()).collect();
 
     // Train the network
-    nn.train(&mut training_data, 10, 30, 3.0, &mut validation_data, &sigmoid, &sigmoid_prime);
+    nn.train(&mut training_data, BATCH_SIZE, EPOCHS, LEARNING_RATE, &mut validation_data, &sigmoid, &sigmoid_prime);
 
     println!("\n\n");
     // Test the network

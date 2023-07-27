@@ -10,7 +10,7 @@ pub struct NeuralNetwork {
     layers: Vec<usize>,
     /// The weight of each synapse. The shape of `weights\[i\]` is `(layers\[i+1\], layers\[i\])`.
     weights: Vec< Vec<Vec<f64>> >,
-    /// The bias of each synaspse. `biases\[0\]` should always be, by convention, a vector full of zeros.
+    /// The bias of each synaspse. The size of `biases\[i\]` is `(layers\[i+1\])`.
     biases: Vec< Vec<f64> >
 }
 
@@ -31,13 +31,7 @@ impl NeuralNetwork {
 
             for _ in 0..layers[i+1] {
                 // Push a random bias in the vector
-                b_vector.push(
-                    if i == 0 { 
-                        0.0 // The first layer being an input layer, we will use biases of zero
-                    } else {
-                        normal.sample(&mut rand::thread_rng())
-                    }
-                );
+                b_vector.push(normal.sample(&mut rand::thread_rng()));
 
                 // Push a random line of weights in the matrix
                 let mut line = vec![];
