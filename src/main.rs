@@ -19,25 +19,40 @@ const LEARNING_RATE: f64 = 3.0;
 
 //#[show_image::main]
 fn main() {
+    println!("[INFO] Begining of the program.");
+    println!("\n[PARAMETERS]\n  - Training length: {} ; Validation length: {} ; Test length: {}", TRAIN_LENGTH, VALIDATION_LENGTH, TEST_LENGTH);
+    println!("  - Batch size: {}", BATCH_SIZE);
+    println!("  - Epochs: {}", EPOCHS);
+    println!("  - Learning rate: {}", LEARNING_RATE);
+    println!("  - Activation: {}", "sigmoid"); // TODO: change
+
     // Initialise network
+    print!("\nInitialising neural network... ");
     let mut nn = NeuralNetwork::new(vec![28*28, 16, 16, 10]);
+    println!("done.");
+
     // Get the data
+    print!("Loading training, validation, and test data... ");
     let (train_images, train_labels, 
         validation_images, validation_labels, 
         test_images, test_labels) = 
         load_data(TRAIN_LENGTH, VALIDATION_LENGTH, TEST_LENGTH);
-
-    // Parse it
+        
+    // Zip the images and labels
     let mut training_data: Vec<(Vec<f64>, u8)> = train_images.into_iter().zip(train_labels.into_iter()).collect();
     let mut validation_data: Vec<(Vec<f64>, u8)> = validation_images.into_iter().zip(validation_labels.into_iter()).collect();
     let testing_data: Vec<(Vec<f64>, u8)> = test_images.into_iter().zip(test_labels.into_iter()).collect();
-
+    println!("done.");
+        
     // Train the network
+    println!("\n[INFO] Starting to train the network.");
     nn.train(&mut training_data, BATCH_SIZE, EPOCHS, LEARNING_RATE, &mut validation_data, &sigmoid, &sigmoid_prime);
+    println!("[INFO] Network trained.");
 
-    println!("\n\n");
+    print!("\n\nEvaluating the network... ");
     // Test the network
     let result = nn.evaluate(&testing_data, &sigmoid);
+    println!("done.");
     print!("{}\n", result);
 }
 
