@@ -1,11 +1,15 @@
+use std::time::Instant;
+
 use rand_distr::{Normal, Distribution};
 use rand::thread_rng;
 use rand::seq::SliceRandom;
 use crate::activation_function::ActivationFunction;
 use crate::utility::*;
 use crate::evaluation_result::*;
+//use serde::{Serialize, Deserialize};
 
 /// A structure containing the actual neural network layers, weights, and biases.
+//#[derive(Serialize, Deserialize)]
 pub struct NeuralNetwork {
     /// The number of neurons in each layer, including first and last layers.
     layers: Vec<usize>,
@@ -66,9 +70,9 @@ impl NeuralNetwork {
             // Apply the activation function to every coefficient
             // Here, I will not use `map` but instead a loop, to map in place
             for i in 0..activation.len() {
-                activation[i] = (self.activation_function.activation_function)(activation[i]);
+                activation[i] = self.activation_function.activation_function(activation[i]);
             }
-            //activation = activation.iter().map(activation_function).collect();
+            //activation = activation.iter().map(self.activation_function.activation_function).collect();
         }
         activation
     }
@@ -84,6 +88,7 @@ impl NeuralNetwork {
         }
         
         for epoch in 0..epochs_nb {
+            let epoch_start_time = Instant::now();
             // Create new batches, different from the previous iteration
             training_data.shuffle(&mut thread_rng());
             let batches: Vec<&[(Vec<f64>, u8)]> = training_data.chunks(batch_size).collect();
@@ -96,10 +101,10 @@ impl NeuralNetwork {
             // Display some update, and compute accuracy if validation is enabled.
             if !validation_data.is_empty() {
                 let result = self.evaluate(validation_data);
-                println!("  [PROGRESS] Epoch {}/{}: validation accuracy of {}%.", epoch+1, epochs_nb, result.accuracy().unwrap()*100.0);
+                println!("  [PROGRESS] Epoch {}/{} completed in {:.2?}: validation accuracy of {}%.", epoch+1, epochs_nb, epoch_start_time.elapsed(), result.accuracy().unwrap()*100.0);
             }
             else {
-                println!("  [PROGRESS] Epoch {}/{} completed.", epoch+1, epochs_nb);
+                println!("  [PROGRESS] Epoch {}/{} completed in {:.2?}.", epoch+1, epochs_nb, epoch_start_time.elapsed());
             }
         }
     }
@@ -167,7 +172,7 @@ impl NeuralNetwork {
 
             // Compute the non-linear activation
             for i in 0..activation.len() {
-                activation[i] = (self.activation_function.activation_function)(activation[i]);
+                activation[i] = self.activation_function.activation_function(activation[i]);
             }
             layers_activations.push(activation.clone());
         }
@@ -186,7 +191,7 @@ impl NeuralNetwork {
         // Multiply `delta` by the last weighted sum, to which `activation_prime` is applied
         assert_eq!(delta.len(), weighted_sums[last_layer].len(), "Incompatible sizes for delta and the last layer's weighted sum.");
         for i in 0..delta.len() {
-            delta[i] *= (self.activation_function.activation_prime)(weighted_sums[last_layer][i])
+            delta[i] *= self.activation_function.activation_prime(weighted_sums[last_layer][i])
         }
 
         // Starts the construction of the gradients.
@@ -204,7 +209,7 @@ impl NeuralNetwork {
             // Multiply `delta` by the weighted sum, to which `activation_prime` is applied
             assert_eq!(delta.len(), weighted_sums[weighted_sums.len() - layer].len(), "Incompatible sizes for delta and the layer's weighted sum, for layer number {}", self.layers.len() - layer - 1);
             for i in 0..delta.len() {
-                delta[i] *= (self.activation_function.activation_prime)(weighted_sums[weighted_sums.len() - layer][i])
+                delta[i] *= self.activation_function.activation_prime(weighted_sums[weighted_sums.len() - layer][i])
             }
 
             // Add the gradient of biases of the layer

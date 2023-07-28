@@ -1,29 +1,37 @@
-/// A structure containing an activation function and its derivative.
+pub enum ActivationFunctionType {
+    Sigmoid,
+    ReLU
+}
+
 pub struct ActivationFunction {
-    pub activation_function: Box<dyn Fn(f64) -> f64>,
-    pub activation_prime: Box<dyn Fn(f64) -> f64>
+    function_type: ActivationFunctionType
 }
 
 impl ActivationFunction {
-    pub fn new(activation_function: Box<dyn Fn(f64) -> f64>, activation_prime: Box<dyn Fn(f64) -> f64>) -> Self {
-        ActivationFunction { 
-            activation_function, 
-            activation_prime 
-        }
+    pub fn new(function_type: ActivationFunctionType) -> Self {
+        ActivationFunction { function_type }
     }
 
     pub fn sigmoid() -> Self {
-        ActivationFunction { 
-            activation_function: Box::new(sigmoid), 
-            activation_prime: Box::new(sigmoid_prime)
-        }
+        ActivationFunction::new(ActivationFunctionType::Sigmoid)
     }
 
     #[allow(non_snake_case)]
     pub fn ReLU() -> Self {
-        ActivationFunction { 
-            activation_function: Box::new(ReLU), 
-            activation_prime: Box::new(ReLU_prime)
+        ActivationFunction::new(ActivationFunctionType::Sigmoid)
+    }
+
+    pub fn activation_function(&self, x: f64) -> f64 {
+        match self.function_type {
+            ActivationFunctionType::Sigmoid => sigmoid(x),
+            ActivationFunctionType::ReLU => ReLU(x)
+        }
+    }
+
+    pub fn activation_prime(&self, x: f64) -> f64 {
+        match self.function_type {
+            ActivationFunctionType::Sigmoid => sigmoid_prime(x),
+            ActivationFunctionType::ReLU => ReLU_prime(x)
         }
     }
 }

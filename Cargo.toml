@@ -10,4 +10,5 @@ edition = "2021"
 rand_distr = "0.4.2"
 rand = "0.8.4"
 mnist = "0.5.0"
-show-image = "0.13.1"
+#show-image = "0.13"
+serde = { version = "1.0", features = ["derive"] }

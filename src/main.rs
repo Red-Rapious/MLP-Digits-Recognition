@@ -1,7 +1,8 @@
 use crate::neural_network::NeuralNetwork;
 use crate::mnist_parser::*;
 use crate::activation_function::ActivationFunction;
-use show_image::{ImageView, ImageInfo, create_window};
+//use show_image::{ImageView, ImageInfo, create_window};
+use std::time::Instant;
 
 pub mod neural_network;
 pub mod tests;
@@ -10,16 +11,17 @@ pub mod mnist_parser;
 pub mod evaluation_result;
 pub mod activation_function;
 
-const TRAIN_LENGTH: u32 = 10_000;
+const TRAIN_LENGTH: u32 = 1_000;
 const VALIDATION_LENGTH: u32 = 0;
-const TEST_LENGTH: u32 = 1_000;
+const TEST_LENGTH: u32 = 100;
 
 const BATCH_SIZE: usize = 10;
-const EPOCHS: usize = 30;
+const EPOCHS: usize = 10;
 const LEARNING_RATE: f64 = 3.0;
 
 //#[show_image::main]
 fn main() {
+    let program_begining = Instant::now();
     println!("[INFO] Begining of the program.");
     println!("\n[PARAMETERS]\n  - Training length: {} ; Validation length: {} ; Test length: {}", TRAIN_LENGTH, VALIDATION_LENGTH, TEST_LENGTH);
     println!("  - Batch size: {}", BATCH_SIZE);
@@ -29,29 +31,35 @@ fn main() {
 
     // Initialise network
     print!("\nInitialising neural network... ");
+    let now = Instant::now();
     let mut nn = NeuralNetwork::new(vec![28*28, 16, 16, 10], ActivationFunction::sigmoid());
-    println!("done.");
+    println!("done in {:.2?}.", now.elapsed());
 
     // Get the data
     print!("Loading training, validation, and test data... ");
+    let now = Instant::now();
     let (mut training_data, 
         mut validation_data, 
         testing_data) = load_data(TRAIN_LENGTH, VALIDATION_LENGTH, TEST_LENGTH);
-    println!("done.");
+    println!("done in {:.2?}.", now.elapsed());
         
     // Train the network
     println!("\n[INFO] Starting to train the network.");
+    let now = Instant::now();
     nn.train(&mut training_data, BATCH_SIZE, EPOCHS, LEARNING_RATE, &mut validation_data);
-    println!("[INFO] Network trained.");
+    println!("[INFO] Network trained. Total training time: {:.2?}", now.elapsed());
 
     print!("\n\nEvaluating the network... ");
+    let now = Instant::now();
     // Test the network
     let result = nn.evaluate(&testing_data);
-    println!("done.");
+    println!("done in {:.2?}.", now.elapsed());
     print!("{}\n", result);
+
+    println!("\n[INFO] End of program. Total execution time: {:.2?}.", program_begining.elapsed());
 }
 
-fn _preview_images() {
+/*fn _preview_images() {
     let (training_data, _, _) = load_data(5, 0, 0);
     //let _result = neural_network.feed_forward(training_images[0].clone(), &sigmoid);
     //println!("result: {:?} \nlabel: {}", result, training_labels[0]);
@@ -65,4 +73,4 @@ fn _preview_images() {
         window.set_image("image-001", image).unwrap();
         window.wait_until_destroyed().unwrap();
     }
-}
+}*/
