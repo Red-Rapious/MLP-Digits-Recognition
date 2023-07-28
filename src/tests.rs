@@ -64,9 +64,7 @@ mod tests {
     #[test]
     fn test_train() {
         let mut nn = NeuralNetwork::new(vec![28*28, 16, 10], ActivationFunction::simoid());
-        let (train_images, train_labels, validation_images, validation_labels, _, _) = load_data(10, 10, 0);
-        let mut training_data = train_images.into_iter().zip(train_labels.into_iter()).collect();
-        let mut validation_data = validation_images.into_iter().zip(validation_labels.into_iter()).collect();
+        let (mut training_data, mut validation_data, _) = load_data(10, 10, 0);
         nn.train(&mut training_data, 2, 2, 1.0, &mut validation_data);
     }
 }

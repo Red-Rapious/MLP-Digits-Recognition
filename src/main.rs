@@ -17,7 +17,6 @@ const TEST_LENGTH: u32 = 1_000;
 const BATCH_SIZE: usize = 10;
 const EPOCHS: usize = 30;
 const LEARNING_RATE: f64 = 3.0;
-//const ACTIVATION
 
 //#[show_image::main]
 fn main() {
@@ -35,15 +34,9 @@ fn main() {
 
     // Get the data
     print!("Loading training, validation, and test data... ");
-    let (train_images, train_labels, 
-        validation_images, validation_labels, 
-        test_images, test_labels) = 
-        load_data(TRAIN_LENGTH, VALIDATION_LENGTH, TEST_LENGTH);
-        
-    // Zip the images and labels
-    let mut training_data: Vec<(Vec<f64>, u8)> = train_images.into_iter().zip(train_labels.into_iter()).collect();
-    let mut validation_data: Vec<(Vec<f64>, u8)> = validation_images.into_iter().zip(validation_labels.into_iter()).collect();
-    let testing_data: Vec<(Vec<f64>, u8)> = test_images.into_iter().zip(test_labels.into_iter()).collect();
+    let (mut training_data, 
+        mut validation_data, 
+        testing_data) = load_data(TRAIN_LENGTH, VALIDATION_LENGTH, TEST_LENGTH);
     println!("done.");
         
     // Train the network
@@ -59,11 +52,11 @@ fn main() {
 }
 
 fn _preview_images() {
-    let (training_images, _, _, _, _, _) = load_data(5, 0, 0);
+    let (training_data, _, _) = load_data(5, 0, 0);
     //let _result = neural_network.feed_forward(training_images[0].clone(), &sigmoid);
     //println!("result: {:?} \nlabel: {}", result, training_labels[0]);
 
-    for training_image in training_images.iter().take(5) {
+    for (training_image, _) in training_data.iter().take(5) {
         let pixel_data: Vec<u8> = training_image.iter().map(|x| ((1.0-x)*256.0) as u8).collect();
         let image = ImageView::new(ImageInfo::mono8(28, 28), &pixel_data);
     

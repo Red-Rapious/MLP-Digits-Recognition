@@ -4,8 +4,8 @@ use crate::utility::split_vector;
 const IMAGE_SIDE: usize = 28;
 
 /// Uses the `mnist` crate to load the training and testing sets.
-/// Returns `(training_images, training_labels, validation_images, validation_labels, testing_images, testing_labels)`
-pub fn load_data(training_length: u32, validation_length: u32, test_length: u32) -> (Vec<Vec<f64>>, Vec<u8>, Vec<Vec<f64>>, Vec<u8>, Vec<Vec<f64>>, Vec<u8>) {
+/// Returns `(training_data, validation_data, test_data)`
+pub fn load_data(training_length: u32, validation_length: u32, test_length: u32) -> (Vec<(Vec<f64>, u8)>, Vec<(Vec<f64>, u8)>, Vec<(Vec<f64>, u8)>) {
     // Deconstruct the returned Mnist struct.
     let Mnist {
         trn_img,
@@ -21,11 +21,12 @@ pub fn load_data(training_length: u32, validation_length: u32, test_length: u32)
         .test_set_length(test_length)
         .finalize();
 
-    (
-     split_vector(&trn_img, IMAGE_SIDE*IMAGE_SIDE), trn_lbl, 
-     split_vector(&val_img, IMAGE_SIDE*IMAGE_SIDE), val_lbl,
-     split_vector(&tst_img, IMAGE_SIDE*IMAGE_SIDE), tst_lbl,
-    )
+     // Zip the images and labels
+    let training_data: Vec<(Vec<f64>, u8)> = split_vector(&trn_img, IMAGE_SIDE*IMAGE_SIDE).into_iter().zip(trn_lbl.into_iter()).collect();
+    let validation_data: Vec<(Vec<f64>, u8)> = split_vector(&val_img, IMAGE_SIDE*IMAGE_SIDE).into_iter().zip(val_lbl.into_iter()).collect();
+    let testing_data: Vec<(Vec<f64>, u8)> = split_vector(&tst_img, IMAGE_SIDE*IMAGE_SIDE).into_iter().zip(tst_lbl.into_iter()).collect();
+
+    (training_data, validation_data, testing_data)
 }
 
 /// Splits a long vector in a vector of 2D vectors representing each image.
