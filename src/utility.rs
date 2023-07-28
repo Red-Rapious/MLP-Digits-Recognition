@@ -40,8 +40,6 @@ pub fn matrices_sum(matrix1: &mut Vec<Vec<f64>>, matrix2: &Vec<Vec<f64>>) {
 /// Given one mutable tensor `T1` and another tensor `T2` of the same size, adds `T2` to `T1`.
 pub fn tensor_sum(tensor1: &mut Vec<Vec<Vec<f64>>>, tensor2: &Vec<Vec<Vec<f64>>>) {
     assert_eq!(tensor1.len(), tensor2.len(), "The two tensors have different heights.");
-    //assert_eq!(tensor1[0].len(), tensor2[0].len(), "The two tensors have different widths.");
-    //assert_eq!(tensor1[0][0].len(), tensor2[0][0].len(), "The two tensors have different depths.");
 
     for i in 0..tensor1.len() {
         for j in 0..tensor1[i].len() {
@@ -54,8 +52,6 @@ pub fn tensor_sum(tensor1: &mut Vec<Vec<Vec<f64>>>, tensor2: &Vec<Vec<Vec<f64>>>
 
 /// Given two vectors `X1` and `X2`, return `X1 * X2^T`, where `X2^T` is the transpose of `X2`
 pub fn vectors_transpose_product(vector1: &Vec<f64>, vector2: &Vec<f64>) -> Vec<Vec<f64>> {
-    //assert_eq!(vector1.len(), vector2.len(), "The two vectors have different sizes.");
-
     let mut matrix = vec![];
     for i in 0..vector1.len() {
         matrix.push(vec![]);
@@ -65,19 +61,6 @@ pub fn vectors_transpose_product(vector1: &Vec<f64>, vector2: &Vec<f64>) -> Vec<
     }
     matrix
 }
-
-/*
-/// Given two vectors `X1` and `X2` of the same size, returns `||X1-X2||^2`, where `||.||` is the euclidian norm.
-pub fn euclidian_distance(vector1: &Vec<f64>, vector2: &Vec<f64>) -> f64 {
-    assert_eq!(vector1.len(), vector2.len(), "The two vectors have different sizes.");
-    let mut total = 0.0;
-
-    for i in 0..vector1.len() {
-        total += (vector1[i]-vector2[i])*(vector1[i]-vector2[i])
-    }
-    total
-}
-*/
 
 /// Given a matrix `A`, returns `A^T`, the transpose of `A`.
 pub fn transpose(matrix: &Vec<Vec<f64>>) -> Vec<Vec<f64>> {

@@ -8,7 +8,7 @@ mod tests {
 
     #[test]
     fn test_nn_initialisation() {
-        let _ = NeuralNetwork::new(vec![100; 10], ActivationFunction::simoid());
+        let _ = NeuralNetwork::new(vec![100; 10], ActivationFunction::sigmoid());
     }
 
     #[test]
@@ -25,22 +25,18 @@ mod tests {
 
     // TODO: test matrices sum, tensor sum, vectors sum
 
-    /*
     #[test]
-    fn test_euclidian_distance() {
-        assert_eq!(
-            euclidian_distance(
-                &vec![1.0, 2.0, 3.0, 4.0], 
-                &vec![5.0, 6.0, 7.0, 8.0]
-            ),
-            4.0*16.0
-        );
-    } 
-    */
+    fn test_feed_forward_sigmoid() {
+        let nn = NeuralNetwork::new(vec![3, 4, 5, 6], ActivationFunction::sigmoid());
+        let input = vec![0.5, 0.2, 0.8];
+        let output = nn.feed_forward(input);
+        println!("{:?}", output);
+    }
 
     #[test]
-    fn test_feed_forward() {
-        let nn = NeuralNetwork::new(vec![3, 4, 5, 6], ActivationFunction::simoid());
+    
+    fn test_feed_forward_relu() {
+        let nn = NeuralNetwork::new(vec![3, 4, 5, 6], ActivationFunction::ReLU());
         let input = vec![0.5, 0.2, 0.8];
         let output = nn.feed_forward(input);
         println!("{:?}", output);
@@ -48,7 +44,7 @@ mod tests {
 
     #[test]
     fn test_mnist_parser() {
-        load_data(100, 100, 100);
+        let (_, _, _) = load_data(100, 100, 100);
     }
 
     #[test]
@@ -62,8 +58,15 @@ mod tests {
     }
 
     #[test]
-    fn test_train() {
-        let mut nn = NeuralNetwork::new(vec![28*28, 16, 10], ActivationFunction::simoid());
+    fn test_train_sigmoid() {
+        let mut nn = NeuralNetwork::new(vec![28*28, 16, 10], ActivationFunction::sigmoid());
+        let (mut training_data, mut validation_data, _) = load_data(10, 10, 0);
+        nn.train(&mut training_data, 2, 2, 1.0, &mut validation_data);
+    }
+
+    #[test]
+    fn test_train_relu() {
+        let mut nn = NeuralNetwork::new(vec![28*28, 16, 10], ActivationFunction::ReLU());
         let (mut training_data, mut validation_data, _) = load_data(10, 10, 0);
         nn.train(&mut training_data, 2, 2, 1.0, &mut validation_data);
     }

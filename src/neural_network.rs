@@ -66,7 +66,7 @@ impl NeuralNetwork {
             // Apply the activation function to every coefficient
             // Here, I will not use `map` but instead a loop, to map in place
             for i in 0..activation.len() {
-                activation[i] = (self.activation_function.activation_function)(&activation[i]);
+                activation[i] = (self.activation_function.activation_function)(activation[i]);
             }
             //activation = activation.iter().map(activation_function).collect();
         }
@@ -167,7 +167,7 @@ impl NeuralNetwork {
 
             // Compute the non-linear activation
             for i in 0..activation.len() {
-                activation[i] = (self.activation_function.activation_function)(&activation[i]);
+                activation[i] = (self.activation_function.activation_function)(activation[i]);
             }
             layers_activations.push(activation.clone());
         }
@@ -186,7 +186,7 @@ impl NeuralNetwork {
         // Multiply `delta` by the last weighted sum, to which `activation_prime` is applied
         assert_eq!(delta.len(), weighted_sums[last_layer].len(), "Incompatible sizes for delta and the last layer's weighted sum.");
         for i in 0..delta.len() {
-            delta[i] *= (self.activation_function.activation_prime)(&weighted_sums[last_layer][i])
+            delta[i] *= (self.activation_function.activation_prime)(weighted_sums[last_layer][i])
         }
 
         // Starts the construction of the gradients.
@@ -204,7 +204,7 @@ impl NeuralNetwork {
             // Multiply `delta` by the weighted sum, to which `activation_prime` is applied
             assert_eq!(delta.len(), weighted_sums[weighted_sums.len() - layer].len(), "Incompatible sizes for delta and the layer's weighted sum, for layer number {}", self.layers.len() - layer - 1);
             for i in 0..delta.len() {
-                delta[i] *= (self.activation_function.activation_prime)(&weighted_sums[weighted_sums.len() - layer][i])
+                delta[i] *= (self.activation_function.activation_prime)(weighted_sums[weighted_sums.len() - layer][i])
             }
 
             // Add the gradient of biases of the layer

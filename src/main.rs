@@ -29,7 +29,7 @@ fn main() {
 
     // Initialise network
     print!("\nInitialising neural network... ");
-    let mut nn = NeuralNetwork::new(vec![28*28, 16, 16, 10], ActivationFunction::simoid());
+    let mut nn = NeuralNetwork::new(vec![28*28, 16, 16, 10], ActivationFunction::sigmoid());
     println!("done.");
 
     // Get the data
