@@ -11,29 +11,24 @@ pub mod mnist_parser;
 pub mod evaluation_result;
 pub mod activation_function;
 
+// If `LOAD_NETWORK` is `true`, the network will be loaded from `FILE_NAME.json`
+// Otherwise, the network will be trained using the parameters specified below
+const LOAD_NETWORK: bool = false;
+const FILE_NAME: &str = "src/saves/network"; // used both for saving and loading
+
+// Parameters used in case of the training of the network
 const TRAIN_LENGTH: u32 = 1_000;
 const VALIDATION_LENGTH: u32 = 0;
 const TEST_LENGTH: u32 = 100;
 
 const BATCH_SIZE: usize = 10;
-const EPOCHS: usize = 10;
+const EPOCHS: usize = 3;
 const LEARNING_RATE: f64 = 3.0;
 
 //#[show_image::main]
 fn main() {
     let program_begining = Instant::now();
     println!("[INFO] Begining of the program.");
-    println!("\n[PARAMETERS]\n  - Training length: {} ; Validation length: {} ; Test length: {}", TRAIN_LENGTH, VALIDATION_LENGTH, TEST_LENGTH);
-    println!("  - Batch size: {}", BATCH_SIZE);
-    println!("  - Epochs: {}", EPOCHS);
-    println!("  - Learning rate: {}", LEARNING_RATE);
-    println!("  - Activation: {}", "sigmoid"); // TODO: change
-
-    // Initialise network
-    print!("\nInitialising neural network... ");
-    let now = Instant::now();
-    let mut nn = NeuralNetwork::new(vec![28*28, 16, 16, 10], ActivationFunction::sigmoid());
-    println!("done in {:.2?}.", now.elapsed());
 
     // Get the data
     print!("Loading training, validation, and test data... ");
@@ -42,17 +37,45 @@ fn main() {
         mut validation_data, 
         testing_data) = load_data(TRAIN_LENGTH, VALIDATION_LENGTH, TEST_LENGTH);
     println!("done in {:.2?}.", now.elapsed());
-        
-    // Train the network
-    println!("\n[INFO] Starting to train the network.");
-    let now = Instant::now();
-    nn.train(&mut training_data, BATCH_SIZE, EPOCHS, LEARNING_RATE, &mut validation_data);
-    println!("[INFO] Network trained. Total training time: {:.2?}", now.elapsed());
 
+
+    let mut neural_network: NeuralNetwork;
+    if LOAD_NETWORK {
+        print!("Loading neural network from {}.json...", FILE_NAME);
+        let now = Instant::now();
+        neural_network = NeuralNetwork::load_network(FILE_NAME);
+        println!("done in {:.2?}.", now.elapsed());
+    } 
+    else {
+        println!("\n[PARAMETERS]\n  - Training length: {} ; Validation length: {} ; Test length: {}", TRAIN_LENGTH, VALIDATION_LENGTH, TEST_LENGTH);
+        println!("  - Batch size: {}", BATCH_SIZE);
+        println!("  - Epochs: {}", EPOCHS);
+        println!("  - Learning rate: {}", LEARNING_RATE);
+        println!("  - Activation: {}\n", "sigmoid"); // TODO: change
+
+        // Initialise network
+        print!("Initialising neural network... ");
+        let now = Instant::now();
+        neural_network = NeuralNetwork::new(vec![28*28, 16, 16, 10], ActivationFunction::sigmoid());
+        println!("done in {:.2?}.", now.elapsed());
+
+        // Train the network
+        println!("\n[INFO] Starting to train the network.");
+        let now = Instant::now();
+        neural_network.train(&mut training_data, BATCH_SIZE, EPOCHS, LEARNING_RATE, &mut validation_data);
+        println!("[INFO] Network trained. Total training time: {:.2?}", now.elapsed());
+
+        // Save the network
+        print!("\n\nSaving the network at {}.json... ", FILE_NAME);
+        let now = Instant::now();
+        neural_network.save_network(FILE_NAME);
+        println!("done in {:.2?}.", now.elapsed());
+    }
+
+    // Test the network
     print!("\n\nEvaluating the network... ");
     let now = Instant::now();
-    // Test the network
-    let result = nn.evaluate(&testing_data);
+    let result = neural_network.evaluate(&testing_data);
     println!("done in {:.2?}.", now.elapsed());
     print!("{}\n", result);
 

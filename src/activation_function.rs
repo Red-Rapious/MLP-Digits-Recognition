@@ -1,26 +1,37 @@
+use serde::{Serialize, Deserialize};
+
+/// An enumeration of all available activation functions.
+#[derive(Debug, Serialize, Deserialize)]
 pub enum ActivationFunctionType {
     Sigmoid,
     ReLU
 }
 
+/// A structure providing the good activation function depending on the given type.
+#[derive(Debug, Serialize, Deserialize)]
 pub struct ActivationFunction {
+    /// The activation function, which will dictate the main function and its derivative.
     function_type: ActivationFunctionType
 }
 
 impl ActivationFunction {
+    /// Create a new ActivationFunction of given type.
     pub fn new(function_type: ActivationFunctionType) -> Self {
         ActivationFunction { function_type }
     }
 
+    /// Shortcut for sigmoid
     pub fn sigmoid() -> Self {
         ActivationFunction::new(ActivationFunctionType::Sigmoid)
     }
 
+    /// Shortcut for ReLU
     #[allow(non_snake_case)]
     pub fn ReLU() -> Self {
         ActivationFunction::new(ActivationFunctionType::Sigmoid)
     }
 
+    /// The main activation function, depends on the type.
     pub fn activation_function(&self, x: f64) -> f64 {
         match self.function_type {
             ActivationFunctionType::Sigmoid => sigmoid(x),
@@ -28,6 +39,7 @@ impl ActivationFunction {
         }
     }
 
+    /// The derivative of the activation function, depends on the type.
     pub fn activation_prime(&self, x: f64) -> f64 {
         match self.function_type {
             ActivationFunctionType::Sigmoid => sigmoid_prime(x),

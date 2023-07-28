@@ -12,3 +12,4 @@ rand = "0.8.4"
 mnist = "0.5.0"
 #show-image = "0.13"
 serde = { version = "1.0", features = ["derive"] }
+serde_json = "1.0.104"

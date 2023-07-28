@@ -1,15 +1,19 @@
+use std::io::Write;
 use std::time::Instant;
 
 use rand_distr::{Normal, Distribution};
 use rand::thread_rng;
 use rand::seq::SliceRandom;
+
 use crate::activation_function::ActivationFunction;
 use crate::utility::*;
 use crate::evaluation_result::*;
-//use serde::{Serialize, Deserialize};
+
+use serde::{Serialize, Deserialize};
+use std::fs::File;
 
 /// A structure containing the actual neural network layers, weights, and biases.
-//#[derive(Serialize, Deserialize)]
+#[derive(Serialize, Deserialize)]
 pub struct NeuralNetwork {
     /// The number of neurons in each layer, including first and last layers.
     layers: Vec<usize>,
@@ -88,6 +92,8 @@ impl NeuralNetwork {
         }
         
         for epoch in 0..epochs_nb {
+            print!("  [PROGRESS] Epoch {}/{}... ", epoch+1, epochs_nb);
+            std::io::stdout().flush().unwrap();
             let epoch_start_time = Instant::now();
             // Create new batches, different from the previous iteration
             training_data.shuffle(&mut thread_rng());
@@ -101,10 +107,10 @@ impl NeuralNetwork {
             // Display some update, and compute accuracy if validation is enabled.
             if !validation_data.is_empty() {
                 let result = self.evaluate(validation_data);
-                println!("  [PROGRESS] Epoch {}/{} completed in {:.2?}: validation accuracy of {}%.", epoch+1, epochs_nb, epoch_start_time.elapsed(), result.accuracy().unwrap()*100.0);
+                println!("completed in {:.2?}: validation accuracy of {}%.", epoch_start_time.elapsed(), result.accuracy().unwrap()*100.0);
             }
             else {
-                println!("  [PROGRESS] Epoch {}/{} completed in {:.2?}.", epoch+1, epochs_nb, epoch_start_time.elapsed());
+                println!("completed in {:.2?}.", epoch_start_time.elapsed());
             }
         }
     }
@@ -253,5 +259,28 @@ impl NeuralNetwork {
         }
 
         EvaluationResult::new(corrects, incorrects)
+    }
+}
+
+impl NeuralNetwork {
+    /// Saves the trained network to a `JSON` file. Note that `file_name` should not contain the `.json` extension.
+    pub fn save_network(&self, file_name: &str){
+        // Convert the network to a string
+        let serialized = serde_json::to_string(&self).unwrap();
+
+        let mut file: File;
+        // Save the string to a file
+        if std::path::Path::new(format!("{}.json", file_name).as_str()).exists() {
+            file = File::create(format!("{}_bis.json", file_name).as_str()).unwrap();
+        } else {
+            file = File::create(format!("{}.json", file_name).as_str()).unwrap();
+        }
+        file.write_all(&serialized.into_bytes()).unwrap();
+    }
+
+    /// Loads a pre-trained network from a `JSON` file. Note that `file_name` should not contain the `.json` extension.
+    pub fn load_network(file_name: &str) -> Self {
+        let file_path = std::fs::read_to_string(format!("{}.json", file_name).as_str()).unwrap();
+        serde_json::from_str(file_path.as_str()).unwrap()
     }
 }
