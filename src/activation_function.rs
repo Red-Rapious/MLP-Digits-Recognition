@@ -72,11 +72,7 @@ fn sigmoid_prime(x: f64) -> f64 {
 /// Rectification function.
 #[allow(non_snake_case)]
 fn ReLU(x: f64) -> f64 {
-    if x >= 0.0 { 
-        x 
-    } else {
-        0.0
-    }
+    f64::max(x, 0.0)
 }
 
 /// Derivative of ReLU

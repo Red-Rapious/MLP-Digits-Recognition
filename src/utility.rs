@@ -1,12 +1,12 @@
-/// This file contains diverse utility functions,
-/// such as linear algebra operations, the cost function, and sigmoid
-use std::vec;
+// This file contains diverse utility functions,
+// such as linear algebra operations, the cost function, and sigmoid
+
 
 /// Given a matrix `A` and a vector `X`, returns the vector `AX`.
 pub fn matrix_vector_product(matrix: &Vec<Vec<f64>>, vector: &Vec<f64>) -> Vec<f64> {
     assert_eq!(matrix[0].len(), vector.len(), "The matrix and vector shapes are incompatible.");
 
-    let mut result = vec![];
+    let mut result = Vec::with_capacity(matrix.len());
     for j in 0..matrix.len() {
         result.push(0.0);
         for i in 0..vector.len() {
@@ -52,9 +52,9 @@ pub fn tensor_sum(tensor1: &mut Vec<Vec<Vec<f64>>>, tensor2: &Vec<Vec<Vec<f64>>>
 
 /// Given two vectors `X1` and `X2`, return `X1 * X2^T`, where `X2^T` is the transpose of `X2`
 pub fn vectors_transpose_product(vector1: &Vec<f64>, vector2: &Vec<f64>) -> Vec<Vec<f64>> {
-    let mut matrix = vec![];
+    let mut matrix = Vec::with_capacity(vector1.len());
     for i in 0..vector1.len() {
-        matrix.push(vec![]);
+        matrix.push(Vec::with_capacity(vector2.len()));
         for j in 0..vector2.len() {
             matrix[i].push(vector1[i] * vector2[j]);
         }
@@ -64,9 +64,9 @@ pub fn vectors_transpose_product(vector1: &Vec<f64>, vector2: &Vec<f64>) -> Vec<
 
 /// Given a matrix `A`, returns `A^T`, the transpose of `A`.
 pub fn transpose(matrix: &Vec<Vec<f64>>) -> Vec<Vec<f64>> {
-    let mut result = vec![];
+    let mut result = Vec::with_capacity(matrix[0].len());
     for i in 0..matrix[0].len() {
-        result.push(vec![]);
+        result.push(Vec::with_capacity(matrix.len()));
         for j in 0..matrix.len() {
             result[i].push(matrix[j][i]);
         }
@@ -78,10 +78,10 @@ pub fn transpose(matrix: &Vec<Vec<f64>>) -> Vec<Vec<f64>> {
 pub fn split_vector(vector: &Vec<u8>, length: usize) -> Vec<Vec<f64>> {
     assert!(vector.len() % length == 0, "The vector length is not a multple of the length.");
 
-    let mut data: Vec<Vec<f64>> = vec![];
+    let mut data: Vec<Vec<f64>> = Vec::with_capacity(vector.len()/(length));
     for i in 0..vector.len()/(length) {
         // Add the image to `data`, in the form of a vector of length `length*length`
-        data.push(vec![]);
+        data.push(Vec::with_capacity(length));
         for y in 0..length {
             data[i].push(vector[i*length + y] as f64 / 256.0);
         }

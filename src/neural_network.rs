@@ -63,8 +63,8 @@ impl NeuralNetwork {
     }
 
     /// Computes the activations of the output layer, given the activations of the input layer.
-    pub fn feed_forward(&self, input: Vec<f64>) -> Vec<f64> {
-        let mut activation = input;
+    pub fn feed_forward(&self, mut activation: Vec<f64>) -> Vec<f64> {
+        //let mut activation = input;
         for i in 0..self.layers.len()-1 {
             // Multiply the activation by the weights matrix
             activation = matrix_vector_product(&self.weights[i], &activation);
@@ -121,14 +121,14 @@ impl NeuralNetwork {
         // article of 'Stochastic gradient descent'
 
         // Initialise gradients for weights and biases to zeros.
-        let mut grad_weights: Vec<Vec<Vec<f64>>> = vec![];
+        let mut grad_weights: Vec<Vec<Vec<f64>>> = Vec::with_capacity(self.weights.len());
         for i in 0..self.weights.len() {
             grad_weights.push(vec![]);
             for _ in 0..self.weights[i].len() {
                 grad_weights[i].push(vec![0.0; self.weights[i][0].len()]);
             }
         }
-        let mut grad_biases: Vec<Vec<f64>> = vec![];
+        let mut grad_biases: Vec<Vec<f64>> = Vec::with_capacity(self.biases.len());
         for biais in self.biases.iter() {
             grad_biases.push(vec![0.0; biais.len()])
         }
@@ -166,11 +166,12 @@ impl NeuralNetwork {
         let mut activation = image.to_owned();
 
         // Stores all the activations and weighted sums during the forward pass
-        let mut layers_activations = vec![image.to_owned()];
-        let mut weighted_sums = vec![];
+        let mut layers_activations = Vec::with_capacity(self.layers.len() - 1);
+        layers_activations.push(image.to_owned());
+        let mut weighted_sums = Vec::with_capacity(self.layers.len() - 1);
 
         // Feed-forward pass
-        for i in 0..self.weights.len() {
+        for i in 0..self.layers.len()-1 {
             // Compute the weighted sum
             activation = matrix_vector_product(&self.weights[i], &activation);
             vectors_sum(&mut activation, &self.biases[i]);
@@ -201,8 +202,8 @@ impl NeuralNetwork {
         }
 
         // Starts the construction of the gradients.
-        let mut grad_biases = vec![];
-        let mut grad_weights = vec![];
+        let mut grad_biases = Vec::with_capacity(self.biases.len());
+        let mut grad_weights = Vec::with_capacity(self.weights.len());
         // Note that the gradients are constructed in reverse and will be reversed at the end
         grad_biases.push(delta.clone());
         grad_weights.push(vectors_transpose_product(&delta, &layers_activations[layers_activations.len()-2].clone()));
