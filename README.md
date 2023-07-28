@@ -1,6 +1,8 @@
 # MLP-Digits-Recognition
 An implementation of a Multilayer Perceptron (MLP) neural network from scratch in Rust, to recognize handwritten digits.
 
+![MNIST dataset banner](assets/mnist-banner.png)
+
 ## About
 ### Motivation
 This project was created following [3Blue1Brown's Neural Networks series](https://youtu.be/aircAruvnKk). The goal of is to implement a Multilayer Perceptron (MLP) neural network from scratch in Rust, and use it to recognize handwritten digits from the [MNIST dataset](http://yann.lecun.com/exdb/mnist/).
@@ -19,7 +21,9 @@ This project uses `Cargo`. With `rust` installed on your machine, you can execut
 $ cargo run
 ```
 
-Unit tests are configured for multiple parts of the project. You can make sure that everything is working by running:
+By default, the program is configured to train a small network, to test it, and to save it. You can change the parameters (described below) in the `main.rs` file, and switch the `LOAD_NETWORK` boolean to `true` to load a network from a `JSON` file instead of training it each time.
+
+Unit tests are also configured for multiple parts of the project. You can make sure that everything is working by running:
 ```console
 $ cargo test
 ```
@@ -37,7 +41,7 @@ You can play with the parameters of the network to try to achieve better results
 - Activation function: the non-linear function used for each synapse. 
   > Both [`sigmoid`](https://en.wikipedia.org/wiki/Sigmoid_function) and [`ReLU`](https://en.wikipedia.org/wiki/Rectifier_(neural_networks)) are implemented.
 
-Default parameters can be seen in the first row of results.
+Reference parameters can be seen in the first row of results.
 
 ## Dataset
 [![MNIST examples](assets/mnist-examples.png)](http://yann.lecun.com/exdb/mnist/)

@@ -1,3 +1,5 @@
+use activation_function::ActivationFunctionType;
+
 use crate::neural_network::NeuralNetwork;
 use crate::mnist_parser::*;
 use crate::activation_function::ActivationFunction;
@@ -24,6 +26,7 @@ const TEST_LENGTH: u32 = 100;
 const BATCH_SIZE: usize = 10;
 const EPOCHS: usize = 3;
 const LEARNING_RATE: f64 = 3.0;
+const ACTIVATION_FUNCTION: ActivationFunctionType = ActivationFunctionType::Sigmoid;
 
 //#[show_image::main]
 fn main() {
@@ -51,12 +54,12 @@ fn main() {
         println!("  - Batch size: {}", BATCH_SIZE);
         println!("  - Epochs: {}", EPOCHS);
         println!("  - Learning rate: {}", LEARNING_RATE);
-        println!("  - Activation: {}\n", "sigmoid"); // TODO: change
+        println!("  - Activation: {}\n", ACTIVATION_FUNCTION);
 
         // Initialise network
         print!("Initialising neural network... ");
         let now = Instant::now();
-        neural_network = NeuralNetwork::new(vec![28*28, 16, 16, 10], ActivationFunction::sigmoid());
+        neural_network = NeuralNetwork::new(vec![28*28, 16, 16, 10], ActivationFunction::new(ACTIVATION_FUNCTION));
         println!("done in {:.2?}.", now.elapsed());
 
         // Train the network
@@ -77,7 +80,7 @@ fn main() {
     let now = Instant::now();
     let result = neural_network.evaluate(&testing_data);
     println!("done in {:.2?}.", now.elapsed());
-    print!("{}\n", result);
+    println!("{}", result);
 
     println!("\n[INFO] End of program. Total execution time: {:.2?}.", program_begining.elapsed());
 }

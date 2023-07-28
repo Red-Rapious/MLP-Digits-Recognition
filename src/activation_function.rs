@@ -1,10 +1,20 @@
 use serde::{Serialize, Deserialize};
+use std::fmt;
 
 /// An enumeration of all available activation functions.
 #[derive(Debug, Serialize, Deserialize)]
 pub enum ActivationFunctionType {
     Sigmoid,
     ReLU
+}
+
+impl fmt::Display for ActivationFunctionType {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        write!(f, "{}", match *self {
+            ActivationFunctionType::ReLU => "ReLU (Rectification function)",
+            ActivationFunctionType::Sigmoid => "Sigmoid (Logistic function)"
+        })
+    }
 }
 
 /// A structure providing the good activation function depending on the given type.
