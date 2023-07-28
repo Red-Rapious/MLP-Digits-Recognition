@@ -136,7 +136,7 @@ impl NeuralNetwork {
         // Compute the overall approximate gradient of the cost on all images of the batch.
         for (image, label) in batch {
             // Use backpropagation to find the small variation of gradient
-            let (delta_grad_w, delta_grad_b) = self.backpropagation(image, &label);
+            let (delta_grad_w, delta_grad_b) = self.backpropagation(image, label);
             // Update the gradient by adding the small variation
             tensor_sum(&mut grad_weights, &delta_grad_w);
             matrices_sum(&mut grad_biases, &delta_grad_b);
@@ -161,12 +161,12 @@ impl NeuralNetwork {
 
     /// Uses the Backpropagation algorithm to compute the approximate gradient 
     /// of the cost function with respect to the weights and the biases.
-    fn backpropagation(&self, image: &Vec<f64>, label: &u8) -> (Vec< Vec<Vec<f64>> >, Vec< Vec<f64> >) {
+    fn backpropagation(&self, image: &[f64], label: &u8) -> (Vec< Vec<Vec<f64>> >, Vec< Vec<f64> >) {
         // Current activation, starting from the input layer
-        let mut activation = image.clone();
+        let mut activation = image.to_owned();
 
         // Stores all the activations and weighted sums during the forward pass
-        let mut layers_activations = vec![image.clone()];
+        let mut layers_activations = vec![image.to_owned()];
         let mut weighted_sums = vec![];
 
         // Feed-forward pass
