@@ -5,6 +5,7 @@ use crate::mnist_parser::*;
 use crate::activation_function::ActivationFunction;
 //use show_image::{ImageView, ImageInfo, create_window};
 use std::time::Instant;
+use std::io::Write;
 
 pub mod neural_network;
 pub mod tests;
@@ -19,8 +20,10 @@ const LOAD_NETWORK: bool = false;
 const FILE_NAME: &str = "src/saves/network"; // used both for saving and loading
 
 // Parameters used in case of the training of the network
+const LAYERS: &'static [usize] = &[28*28, 16, 16, 10];
+
 const TRAIN_LENGTH: u32 = 1_000;
-const VALIDATION_LENGTH: u32 = 0;
+const VALIDATION_LENGTH: u32 = 100;
 const TEST_LENGTH: u32 = 100;
 
 const BATCH_SIZE: usize = 10;
@@ -35,6 +38,7 @@ fn main() {
 
     // Get the data
     print!("Loading training, validation, and test data... ");
+    std::io::stdout().flush().unwrap();
     let now = Instant::now();
     let (mut training_data, 
         mut validation_data, 
@@ -59,7 +63,7 @@ fn main() {
         // Initialise network
         print!("Initialising neural network... ");
         let now = Instant::now();
-        neural_network = NeuralNetwork::new(vec![28*28, 16, 16, 10], ActivationFunction::new(ACTIVATION_FUNCTION));
+        neural_network = NeuralNetwork::new(LAYERS.to_vec(), ActivationFunction::new(ACTIVATION_FUNCTION));
         println!("done in {:.2?}.", now.elapsed());
 
         // Train the network

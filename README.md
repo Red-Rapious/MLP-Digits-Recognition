@@ -30,6 +30,8 @@ $ cargo test
 
 ### Parameters
 You can play with the parameters of the network to try to achieve better results:
+- `LAYERS`: the number of neurons of each layer. 
+  > The input and output layer must remain the same, `28*28` and `10`, otherwise the program won't work.
 - `TRAIN_LENGTH`: the number of images used for training.
 - `VALIDATION_LENGTH`: the number of images used for validation.
    > After each epoch, if `VALIDATION_LENGTH != 0`, the program will test the currently trained network on the validation set.
@@ -49,9 +51,15 @@ Reference parameters can be seen in the first row of results.
 The dataset used for both training and testing is the [MNIST dataset](http://yann.lecun.com/exdb/mnist/), which contains 60,000 training images and 10,000 testing images of handwritten digits. The images are 28x28 pixels, and the digits are centered in the middle of the image. Examples of the images are shown above.
 
 ## Results
-| Layers | Training images | Testing images | Batch size | Epochs | Learning rate | Activation function | Training time |
-| - | - | - | - | - | - | - | - |
-| 784, 16, 16, 10 | 10 000 | 1 000 | 10 | 30 | 3.0 | Sigmoid | *Not mesured* |
+| Accuracy | Layers | Training images | Testing images | Batch size | Epochs | Learning rate | Activation function | Training time |
+| - | - | - | - | - | - | - | - | - |
+| 90% | 784, 16, 16, 10 | 50 000 | 1 000 | 10 | 3 | 3.0 | Sigmoid | 232s |
+| 73,3% | 784, 10 | 50 000 | 1 000 | 10 | 3 | 3.0 | Sigmoid | 137s |
+| 91% | 784, 100, 50, 10 | 50 000 | 1 000 | 10 | 1 | 3.0 | Sigmoid | 503s |
+| 88.9% | 784, 300, 100, 50, 10 | 50 000 | 1 000 | 10 | 1 | 3.0 | Sigmoid | 1 691s |
+<!--| *Not mesured* | 784, 16, 16, 10 | 10 000 | 1 000 | 10 | 30 | 3.0 | Sigmoid | *Not mesured* |-->
+
+> Note: training time is only given as an indicative way to compare between two different trainings. My code, especially the linear algebra part, is not optimized, and performance varies with CPU model and parallel usage.
 
 ## License
 This work is licensed under the [CC-BY-NC-SA 4.0](https://creativecommons.org/licenses/by-nc-sa/4.0/) license.
