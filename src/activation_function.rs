@@ -1,7 +1,7 @@
 use serde::{Serialize, Deserialize};
 use std::fmt;
 
-/// An enumeration of all available activation functions.
+/// An enumeration of all available activation functions, like `Sigmoid` or `ReLU`.
 #[derive(Debug, Serialize, Deserialize)]
 pub enum ActivationFunctionType {
     Sigmoid,

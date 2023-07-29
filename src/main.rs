@@ -1,5 +1,4 @@
 use activation_function::ActivationFunctionType;
-
 use crate::neural_network::NeuralNetwork;
 use crate::mnist_parser::*;
 use crate::activation_function::ActivationFunction;
@@ -60,27 +59,27 @@ fn main() {
         println!("  - Learning rate: {}", LEARNING_RATE);
         println!("  - Activation: {}\n", ACTIVATION_FUNCTION);
 
-        // Initialise network
-        print!("Initialising neural network... ");
+        // Initialize network
+        print!("Initializing neural network... ");
         let now = Instant::now();
         neural_network = NeuralNetwork::new(LAYERS.to_vec(), ActivationFunction::new(ACTIVATION_FUNCTION));
         println!("done in {:.2?}.", now.elapsed());
 
         // Train the network
-        println!("\n[INFO] Starting to train the network.");
+        println!("\n[INFO] Starting to train the network.\n");
         let now = Instant::now();
         neural_network.train(&mut training_data, BATCH_SIZE, EPOCHS, LEARNING_RATE, &mut validation_data);
-        println!("[INFO] Network trained. Total training time: {:.2?}", now.elapsed());
+        println!("\n[INFO] Network trained. Total training time: {:.2?}", now.elapsed());
 
         // Save the network
-        print!("\n\nSaving the network at {}.json... ", FILE_NAME);
+        print!("\nSaving the network at {}.json... ", FILE_NAME);
         let now = Instant::now();
         neural_network.save_network(FILE_NAME);
         println!("done in {:.2?}.", now.elapsed());
     }
 
     // Test the network
-    print!("\n\nEvaluating the network... ");
+    print!("\nEvaluating the network... ");
     let now = Instant::now();
     let result = neural_network.evaluate(&testing_data);
     println!("done in {:.2?}.", now.elapsed());

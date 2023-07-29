@@ -12,6 +12,8 @@ use crate::evaluation_result::*;
 use serde::{Serialize, Deserialize};
 use std::fs::File;
 
+use progress_bar::*;
+
 /// A structure containing the actual neural network layers, weights, and biases.
 #[derive(Serialize, Deserialize)]
 pub struct NeuralNetwork {
@@ -92,25 +94,29 @@ impl NeuralNetwork {
         }
         
         for epoch in 0..epochs_nb {
-            print!("  [PROGRESS] Epoch {}/{}... ", epoch+1, epochs_nb);
             std::io::stdout().flush().unwrap();
             let epoch_start_time = Instant::now();
             // Create new batches, different from the previous iteration
             training_data.shuffle(&mut thread_rng());
             let batches: Vec<&[(Vec<f64>, u8)]> = training_data.chunks(batch_size).collect();
+            
+            init_progress_bar(batches.len());
+            set_progress_bar_action(format!("Epoch {}/{}", epoch+1, epochs_nb).as_str(), Color::White, Style::Normal);
 
             // Compute gradient and update weights and biases for each batch
             for batch in batches {
                 self.learn(batch, learning_rate);
+                inc_progress_bar();
             }
+            finalize_progress_bar();
 
             // Display some update, and compute accuracy if validation is enabled.
             if !validation_data.is_empty() {
                 let result = self.evaluate(validation_data);
-                println!("completed in {:.2?}: validation accuracy of {}%.", epoch_start_time.elapsed(), result.accuracy().unwrap()*100.0);
+                println!("      => Completed in {:.2?}, with validation accuracy of {:.1?}%.", epoch_start_time.elapsed(), result.accuracy().unwrap()*100.0);
             }
             else {
-                println!("completed in {:.2?}.", epoch_start_time.elapsed());
+                println!("      => Completed in {:.2?}.", epoch_start_time.elapsed());
             }
         }
     }

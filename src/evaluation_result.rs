@@ -12,6 +12,7 @@ impl EvaluationResult {
         EvaluationResult { corrects, incorrects }
     }
     
+    /// Total number of outputs, corrects or incorrects.
     pub fn test_data_length(&self) -> usize {
         self.corrects + self.incorrects
     }
@@ -29,12 +30,12 @@ impl EvaluationResult {
 
 impl fmt::Display for EvaluationResult {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        write!(f, "Evaluation result:\n   corrects: {}/{}\n   accuracy: {}", 
+        write!(f, "Evaluation result:\n   Corrects: {}/{}\n   Accuracy: {}", 
             self.corrects, 
             self.test_data_length(), 
             match self.accuracy() {
                 None => String::from("undef"),
-                Some(a) => (a*100.0).to_string() + &String::from("%")
+                Some(a) => format!("{:.1?}", a*100.0).to_string() + &String::from("%")
             })
     }
 }
