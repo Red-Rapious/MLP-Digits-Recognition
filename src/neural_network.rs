@@ -113,10 +113,10 @@ impl NeuralNetwork {
             // Display some update, and compute accuracy if validation is enabled.
             if !validation_data.is_empty() {
                 let result = self.evaluate(validation_data);
-                println!("      => Completed in {:.2?}, with validation accuracy of {:.1?}%.", epoch_start_time.elapsed(), result.accuracy().unwrap()*100.0);
+                println!("      => Completed in {:.2?}, with validation accuracy of {:.1?}%. ETA: {:.1?} remaining.", epoch_start_time.elapsed(), result.accuracy().unwrap()*100.0, epoch_start_time.elapsed() * ((epochs_nb - epoch - 1) as u32));
             }
             else {
-                println!("      => Completed in {:.2?}.", epoch_start_time.elapsed());
+                println!("      => Completed in {:.2?}. ETA: {:.1?} remaining.", epoch_start_time.elapsed(), epoch_start_time.elapsed() * ((epochs_nb - epoch - 1) as u32));
             }
         }
     }
