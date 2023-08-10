@@ -2,11 +2,15 @@
 name = "mlp_digits_recognition"
 version = "0.1.0"
 edition = "2021"
+authors = ["Red-Rapious"]
+readme = "README.md"
+repository = "https://github.com/Red-Rapious/MLP-Digits-Recognition"
+license-file = "LICENSE"
+keywords = ["neural-network", "digits-recognition", "mnist-handwriting-recognition"]
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
-#idx_file = "0.33.0"
 rand_distr = "0.4.2"
 rand = "0.8.4"
 mnist = "0.5.0"
